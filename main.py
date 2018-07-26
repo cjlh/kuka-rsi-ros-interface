@@ -89,9 +89,9 @@ def send_command(s):
     print('---')
 
     target_pos = {
-        'x': '230.0',
-        'y': '75.0',
-        'z': '490.0'
+        'x': '130.0',
+        'y': '200.0',
+        'z': '400.0'
     }
     if (pos_data['x'] == target_pos['x'] and
             pos_data['y'] == target_pos['y'] and
@@ -108,20 +108,25 @@ def send_command(s):
     a5 = '0.0'
     a6 = '0.0'
 
+    if (pos_data['x'] == target_pos['x']):
+        for i in range(0,10):
+            print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+
+    if (pos_data['y'] == target_pos['y']):
+        for i in range(0,10):
+            print('yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy')
+
+    if (pos_data['z'] == target_pos['z']):
+        for i in range(0,10):
+            print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+
     # cartesian co-ordinate corrections to make every ~12ms(?)
-    x = '-0.1'
-    y = '0.1'
-    z = '-0.1'
+    x = '-0.1' if (pos_data['x'] != target_pos['x']) else '0.0'
+    y = '0.1' if (pos_data['y'] != target_pos['y']) else '0.0'
+    z = '-0.1' if (pos_data['z'] != target_pos['z']) else '0.0'
     a = '0.0'
     b = '0.0'
     c = '0.0'
-
-    if (pos_data['x'] == target_pos['x']):
-        x = '0.0'
-    if (pos_data['y'] == target_pos['y']):
-        y = '0.0'
-    if (pos_data['z'] == target_pos['z']):
-        z = '0.0'
 
     """
     instruction_template = \
