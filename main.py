@@ -2,16 +2,15 @@
 Proof-of-concept RSI communicator
 """
 
-SERVER_IP = '172.31.1.146'
-SERVER_PORT = 49152
-
-BUFFER_SIZE = 1024
-
-
 import socket
 # xml parser
 from xml.dom import minidom
 
+
+SERVER_IP = '172.31.1.146'
+SERVER_PORT = 49152
+
+BUFFER_SIZE = 1024
 
 HEADER = '<Sen Type=\"ImFree\"><EStr>KRCnexxt - RSI Object ST_ETHERNET</EStr>'
 DEFAULT_INSTRUCTION = '<RKorr X=\"0.0000\" Y=\"0.0000\" Z=\"0.0000\" A=\"0.0000\" \
@@ -123,7 +122,6 @@ def send_command(s):
         y = '0.0'
     if (pos_data['z'] == target_pos['z']):
         z = '0.0'
-
 
     """
     instruction_template = \
