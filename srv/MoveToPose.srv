@@ -1,0 +1,4 @@
+KukaPose pose
+---
+bool success
+string message

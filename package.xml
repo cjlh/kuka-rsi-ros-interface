@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<package format="1">
+  <name>kuka_rsi_ros_interface</name>
+  <version>0.0.1</version>
+  <description>A ROS node for the manipulation of a KUKA robot arm via RSI 3.</description>
+
+  <maintainer email="cjlhamilton@gmail.com">Caleb Hamilton</maintainer>
+
+  <license>GPLv3</license>
+
+  <!-- Type attributes: website, bugtracker, or repository -->
+  <url type="website">https://github.com/cjlh/kuka-rsi-ros-interface</url>
+
+  <author email="cjlhamilton@gmail.com">Caleb Hamilton</author>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>message_generation</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>message_runtime</run_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
