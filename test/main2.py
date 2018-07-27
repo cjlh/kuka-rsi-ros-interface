@@ -204,7 +204,7 @@ def main():
     # Re-use socket
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((SERVER_IP, SERVER_PORT))
-    xml_file = open('DataTemplate.xml', 'r')
+    xml_file = open('../xml/DataTemplate.xml', 'r')
     default_command = xml_file.read()
 
     print('socket opened')
