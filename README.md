@@ -14,8 +14,8 @@ Developed for ROS Kinetic.
 
 The source code is released under the [GNU General Public License v3.0](kuka_rsi_ros_interface/LICENSE).
 
-**Author: Caleb Hamilton (cjlhamilton@gmail.com)
-Maintainer: Caleb Hamilton (cjlhamilton@gmail.com)
+**Author: Caleb Hamilton
+Maintainer: Caleb Hamilton
 Status: Early development**
 
 
