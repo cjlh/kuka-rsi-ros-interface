@@ -11,8 +11,11 @@
 // ROS
 #include <ros/ros.h>
 
-// YAML Parsing
+// YAML parsing
 // #include "yaml-cpp/yaml.h"
+
+// XML parsing
+#include "pugixml.hpp"
 
 // Exceptions
 // #include "SomeException.h"
@@ -24,7 +27,7 @@
 #include "kuka_rsi_ros_interface/MoveToPose.h"
 #include "kuka_rsi_ros_interface/GetPose.h"
 
-// From socket tutorial
+// For socket handling
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/socket.h>
@@ -120,25 +123,27 @@ int main(int argc, char **argv) {
 
     ROS_INFO("Waiting to receive data.");
 
-    // Receive
-    int recvlen = recvfrom(server_fd, buffer, BUFFER_SIZE, 0,
-        (struct sockaddr *) &address, &addrlen);
-    printf("received %d bytes\n", recvlen);
-    if (recvlen > 0) {
-        buffer[recvlen] = 0;
-        printf("received message: \"%s\"\n", buffer);
-    }
-
-    return 0;
-
     // Main program loop
     while(ros::ok()) {
         // Call all callbacks waiting to be called
         ros::spinOnce();
 
-        // Do socket stuff
-        // ...
+        // Receive
+        int recvlen = recvfrom(server_fd, buffer, BUFFER_SIZE, 0,
+            (struct sockaddr *) &address, &addrlen);
+        printf("received %d bytes\n", recvlen);
+        if (recvlen > 0) {
+            buffer[recvlen] = 0;
+            printf("received message: \"%s\"\n", buffer);
+        }
+
+        buffer.
+
+        sendto(server_fd, buffer, strlen(buffer), 0, (struct sockaddr *) &address, addrlen);
     }
+
+    ROS_INFO("Closing socket.");
+    close(server_fd);
 
     return 0;
 
