@@ -59,11 +59,34 @@ bool movetoPositionCallback(
 
 
 /*
+ * TODO: sort syntax styling
+ */
+void receiveDataFromController(int server_fd, char *buffer,
+        struct sockaddr *address, socklen_t *addrlen) {
+    int recvlen = recvfrom(server_fd, buffer, BUFFER_SIZE, 0,
+        address, addrlen);
+    if (recvlen == -1) {
+        ROS_ERROR("Robot controller is not sending data. Closing socket "
+                  "and exiting...");
+        close(server_fd);
+        exit(EXIT_FAILURE);
+    } else {
+        ROS_INFO("Received %d bytes.", recvlen);
+        buffer[recvlen] = 0;
+        ROS_INFO("Received data:\n\"%s\"", buffer);
+    }
+}
+
+
+/*
  * Returns a string with correct timestamp given some data received from the
  * robot controller and data that is to be sent.
  */
 std::string updateTimestamp(std::string received_data,
         std::string data_to_send) {
+    // Read <IPOC> tag from received_data
+    // Set <IPOD> tag in data_to_send to received_data value
+    // Return new string
     return "TODO";
 }
 
@@ -132,19 +155,14 @@ int main(int argc, char **argv) {
 
     // Create buffer and length variable for socket data exchange
     char buffer[BUFFER_SIZE] = {0};
-    int recvlen;
+    // int recvlen;
 
     ROS_INFO("Waiting to receive data from RSI on %s:%u...", SERVER_ADDRESS,
         SERVER_PORT);
 
     // Receive initial data from RSI
-    recvlen = recvfrom(server_fd, buffer, BUFFER_SIZE, 0,
-        (struct sockaddr *) &address, &addrlen);
-    ROS_INFO("Received %d bytes.", recvlen);
-    if (recvlen > 0) {
-        buffer[recvlen] = 0;
-        ROS_INFO("Received data:\n\"%s\"", buffer);
-    }
+    receiveDataFromController(server_fd, buffer, (struct sockaddr *) &address,
+        &addrlen);
     // TODO: Separate into function and give reply
     // ...
 
@@ -163,19 +181,8 @@ int main(int argc, char **argv) {
         // Call all callbacks waiting to be called
         ros::spinOnce();
 
-        // Receive further data
-        recvlen = recvfrom(server_fd, buffer, BUFFER_SIZE, 0,
+        receiveDataFromController(server_fd, buffer,
             (struct sockaddr *) &address, &addrlen);
-        if (recvlen == -1) {
-            ROS_ERROR("Robot controller is no longer sending data. Closing "
-                      "socket and exiting...");
-            close(server_fd);
-            exit(EXIT_FAILURE);
-        }
-
-        ROS_INFO("Received %d bytes.", recvlen);
-        buffer[recvlen] = 0;
-        ROS_INFO("Received data:\n\"%s\"", buffer);
 
         // TODO...
         // buffer.
