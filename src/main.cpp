@@ -2,11 +2,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-
-// Socket and network handling
-#include <arpa/inet.h>
-#include <sys/socket.h>
+#include <string>
 
 // ROS
 #include <ros/ros.h>
@@ -25,6 +21,9 @@
 #include "kuka_rsi_ros_interface/MoveToPose.h"
 #include "kuka_rsi_ros_interface/GetPose.h"
 
+// Package classes
+#include "RsiCommunicator.h"
+
 
 // Global variables
 
@@ -33,7 +32,7 @@ static const std::string PACKAGE_PATH = ros::package::getPath(NODE_NAME);
 
 static const char* SERVER_ADDRESS = "172.31.1.146";
 static const uint16_t SERVER_PORT = 49152;
-static const unsigned int BUFFER_SIZE = 1024;
+static const int BUFFER_SIZE = 1024;
 
 
 /*
@@ -59,31 +58,11 @@ bool movetoPositionCallback(
 
 
 /*
- * TODO: sort syntax styling
+ * Returns a string with correct timestamp given some data received from
+ * the robot controller and data that is to be sent.
  */
-void receiveDataFromController(int server_fd, char *buffer,
-        struct sockaddr *address, socklen_t *addrlen) {
-    int recvlen = recvfrom(server_fd, buffer, BUFFER_SIZE, 0,
-        address, addrlen);
-    if (recvlen == -1) {
-        ROS_ERROR("Robot controller is not sending data. Closing socket "
-                  "and exiting...");
-        close(server_fd);
-        exit(EXIT_FAILURE);
-    } else {
-        ROS_INFO("Received %d bytes.", recvlen);
-        buffer[recvlen] = 0;
-        ROS_INFO("Received data:\n\"%s\"", buffer);
-    }
-}
-
-
-/*
- * Returns a string with correct timestamp given some data received from the
- * robot controller and data that is to be sent.
- */
-std::string updateTimestamp(std::string received_data,
-        std::string data_to_send) {
+std::string updateMessageTimestamp(std::string received_data,
+                                   std::string data_to_send) {
     // Read <IPOC> tag from received_data
     // Set <IPOD> tag in data_to_send to received_data value
     // Return new string
@@ -122,76 +101,31 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    // Create socket file descriptor for UDP socket
-    int server_fd;
-    if ((server_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        ROS_ERROR("Failed to open socket.");
-        exit(EXIT_FAILURE); 
-    }
-
-    // Enable address/port reuse
-    int opt_reuse = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-            &opt_reuse, sizeof(opt_reuse)) < 0) {
-        ROS_ERROR("Failed to set socket options.");
-        exit(EXIT_FAILURE);
-    }
-
-    // Configure socket address
-    struct sockaddr_in address;
-    socklen_t addrlen = sizeof(address);
-
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(SERVER_ADDRESS);
-    address.sin_port = htons(SERVER_PORT);
-    
-    // Bind socket to address/port
-    if (bind(server_fd, (struct sockaddr *) &address,
-            sizeof(address)) < 0) {
-        ROS_ERROR("Failed to bind socket to %s:%u.", SERVER_ADDRESS,
-            SERVER_PORT);
-        exit(EXIT_FAILURE);
-    }
-
-    // Create buffer and length variable for socket data exchange
-    char buffer[BUFFER_SIZE] = {0};
-    // int recvlen;
-
-    ROS_INFO("Waiting to receive data from RSI on %s:%u...", SERVER_ADDRESS,
-        SERVER_PORT);
-
-    // Receive initial data from RSI
-    receiveDataFromController(server_fd, buffer, (struct sockaddr *) &address,
-        &addrlen);
-    // TODO: Separate into function and give reply
-    // ...
-
-    // Set socket timeout for further data exchange
-    struct timeval timeout;
-    timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
-            sizeof(timeout)) < 0) {
-        ROS_ERROR("Could not configure socket timeout for further data "
-                  "exchange.");
-    }
+    RsiCommunicator *rsi_comm = new RsiCommunicator(SERVER_ADDRESS, SERVER_PORT,
+                                                    BUFFER_SIZE);
+    rsi_comm->initiate();
 
     // Main program loop
     while(ros::ok()) {
         // Call all callbacks waiting to be called
         ros::spinOnce();
 
-        receiveDataFromController(server_fd, buffer,
-            (struct sockaddr *) &address, &addrlen);
+        std::string response;
+        try {
+            response = rsi_comm->receiveDataFromController();
+        } catch (const std::exception &e) {
+            ROS_ERROR("Problem communicating with robot controller. "
+                      "Exiting...");
+            exit(EXIT_FAILURE);
+        }
 
-        // TODO...
-        // buffer.
-        // sendto(server_fd, buffer, strlen(buffer), 0,
-        //     (struct sockaddr *) &address, addrlen);
+        // process message received from controller
+
+        // return message to controller
+        // rsi_comm->sendInstructionToController(instruction);
     }
 
-    ROS_INFO("Closing socket.");
-    close(server_fd);
+    delete rsi_comm;
 
     return 0;
 

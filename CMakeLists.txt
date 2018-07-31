@@ -52,6 +52,11 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 set(src_files
 	${PROJECT_SOURCE_DIR}/src/main.cpp
+	${PROJECT_SOURCE_DIR}/src/RsiCommunicator.cpp
+)
+
+set(hdr_files
+	${PROJECT_SOURCE_DIR}/src/RsiCommunicator.h
 )
 
 add_executable(main ${src_files})
@@ -63,6 +68,7 @@ add_dependencies(main
 
 
 target_link_libraries(main
+	${hdr_files}
 	${catkin_LIBRARIES}
 	${TinyXML_LIBRARIES}
 )
