@@ -25,9 +25,28 @@ Status: Early development**
 - Eren Sezener and Osman Kaya from the Ozyegin University Robotics Laboratory for helping me to understand the RSI protocol through their work on the *KUKA RSI-3 Communicator* project (https://github.com/erensezener/kuka-rsi3-communicator).
 
 
-## Dependencies
-[to do]
-
-
 ## Installation
+
+### Dependencies
 [to do]
+
+### Building 
+[to do]
+
+
+## Usage
+
+### Configuration
+[to do]
+
+### Launching
+[to do]
+
+
+## Nodes
+[to do]
+
+
+## To-do
+
+- [ ] Add yaml config files for IP, port, etc.
