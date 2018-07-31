@@ -57,6 +57,11 @@ class RsiCommunicator
         ~RsiCommunicator();
 
         /*
+         *
+         */
+        bool setSocketTimeout(long sec, long usec);
+
+        /*
          * TODO.
          */
         void initiate();

@@ -103,7 +103,14 @@ int main(int argc, char **argv) {
 
     RsiCommunicator *rsi_comm = new RsiCommunicator(SERVER_ADDRESS, SERVER_PORT,
                                                     BUFFER_SIZE);
-    rsi_comm->initiate();
+
+    try {
+        rsi_comm->initiate();
+    } catch (const std::exception &e) {
+        ROS_ERROR("Problem initiating communication with robot controller. "
+                  "Exiting...");
+        exit(EXIT_FAILURE);
+    }
 
     // Main program loop
     while(ros::ok()) {

@@ -36,7 +36,6 @@ RsiCommunicator::RsiCommunicator(const char* ip_address, uint16_t port,
 
     // Configure socket address
     this->addrlen = sizeof(this->address);
-
     this->address.sin_family = AF_INET;
     this->address.sin_addr.s_addr = inet_addr(ip_address);
     this->address.sin_port = htons(port);
@@ -59,6 +58,21 @@ RsiCommunicator::~RsiCommunicator() {
 
 
 /*
+ *
+ */
+bool RsiCommunicator::setSocketTimeout(long sec, long usec) {
+    struct timeval timeout;
+    timeout.tv_sec = sec;
+    timeout.tv_usec = usec;
+    if (setsockopt(this->server_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
+                   sizeof(timeout)) < 0) {
+        return false;
+    }
+    return true;
+}
+
+
+/*
  * TODO.
  */
 void RsiCommunicator::initiate() {
@@ -68,16 +82,18 @@ void RsiCommunicator::initiate() {
              this->port);
 
     // Receive initial data from RSI
-    receiveDataFromController();
-    // TODO: Separate into function and give reply
-    // ...
+    try {
+        // TODO: get rid of this ugly code and implement interrupt instead as a
+        // matter of priority
+        receiveDataFromController();
+    } catch (const std::exception &e) {
+        throw std::exception();
+    }
 
     // Set socket timeout for further data exchange
-    struct timeval timeout;
-    timeout.tv_sec = 5;
-    timeout.tv_usec = 0;
-    if (setsockopt(this->server_fd, SOL_SOCKET, SO_RCVTIMEO, &timeout,
-                   sizeof(timeout)) < 0) {
+    bool is_timeout_set = setSocketTimeout(5, 0);
+
+    if (!is_timeout_set)  {
         ROS_ERROR("Could not configure socket timeout for further data "
                   "exchange.");
     }
