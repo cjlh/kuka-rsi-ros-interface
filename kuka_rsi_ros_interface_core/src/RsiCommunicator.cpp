@@ -23,7 +23,7 @@ RsiCommunicator::RsiCommunicator(const char* ip_address, uint16_t port,
     // Create socket file descriptor for UDP socket
     if ((this->server_fd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         ROS_ERROR("Failed to open socket.");
-        exit(EXIT_FAILURE); 
+        throw std::exception();
     }
 
     // Enable address/port reuse
@@ -31,7 +31,7 @@ RsiCommunicator::RsiCommunicator(const char* ip_address, uint16_t port,
     if (setsockopt(this->server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
             &opt_reuse, sizeof(opt_reuse)) < 0) {
         ROS_ERROR("Failed to set socket options.");
-        exit(EXIT_FAILURE);
+        throw std::exception();
     }
 
     // Configure socket address
@@ -44,13 +44,13 @@ RsiCommunicator::RsiCommunicator(const char* ip_address, uint16_t port,
     if (bind(this->server_fd, (struct sockaddr *) &(this->address),
              sizeof(address)) < 0) {
         ROS_ERROR("Failed to bind socket to %s:%u.", ip_address, this->port);
-        exit(EXIT_FAILURE);
+        throw std::exception();
     }
 }
 
 
 /*
- * TODO.
+ * Destructor - ensure socket is closed on destruction.
  */
 RsiCommunicator::~RsiCommunicator() {
     closeSocket();
@@ -87,7 +87,7 @@ void RsiCommunicator::initiate() {
         // matter of priority
         receiveDataFromController();
     } catch (const std::exception &e) {
-        throw std::exception();
+        throw;
     }
 
     // Set socket timeout for further data exchange
@@ -104,7 +104,7 @@ void RsiCommunicator::initiate() {
  * TODO: IMPLEMENT PROPER RAII DESIGN. (SO: 21511806)
  */
 void RsiCommunicator::closeSocket() {
-    ROS_INFO("Closing socket.");
+    ROS_WARN("Closing socket.");
     close(this->server_fd);
 }
 
@@ -118,7 +118,7 @@ std::string RsiCommunicator::receiveDataFromController() {
                            (struct sockaddr *) &(this->address),
                            &(this->addrlen));
     if (recvlen == -1) {
-        ROS_ERROR("Robot controller is not sending data. Closing socket...");
+        ROS_ERROR("Robot controller is not sending data.");
         close(this->server_fd);
         throw std::exception();
     } else {
