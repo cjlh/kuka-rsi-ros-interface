@@ -21,8 +21,8 @@ Status: Early development**
 
 ### Thanks to...
 
-- Dalton Nuclear Institute (http://www.dalton.manchester.ac.uk/) for funding this project and granting permission to publish as open source;
-- Eren Sezener and Osman Kaya from the Ozyegin University Robotics Laboratory for helping me to understand the RSI protocol through their work on the *KUKA RSI-3 Communicator* project (https://github.com/erensezener/kuka-rsi3-communicator).
+-  **The University of Manchester's** Dalton Nuclear Institute (http://www.dalton.manchester.ac.uk/) for funding this project and granting permission to publish as open source;
+-  Eren Sezener and Osman Kaya from the Ozyegin University Robotics Laboratory for helping me to understand the RSI protocol through their work on the *KUKA RSI-3 Communicator* project (https://github.com/erensezener/kuka-rsi3-communicator).
 
 
 ## Installation
@@ -31,12 +31,13 @@ Status: Early development**
 [to do]
 
 ### Installation on robot controller 
-1. From the `krc_files` directory, copy the file `RSI_Ethernet.src` to the directory `KRC:\R1\Program` on the robot controller
-2. Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller (*Expert* user group is required)
+1.  From the `krc_files` directory, copy the file `RSI_Ethernet.src` to the directory `KRC:\R1\Program` on the robot controller
+2.  Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller (*Expert* user group is required)
 
 ### Building
-1. Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
-2. Build the packages using catkin (Note: tested with catkin_tools only)
+1.  Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
+2.  Build the packages using catkin (Note: tested with catkin_tools only)
+    1.  E.g. `$ catkin build`
 
 
 ## Usage
