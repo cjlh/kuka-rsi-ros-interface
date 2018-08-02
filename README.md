@@ -30,10 +30,12 @@ Status: Early development**
 ### Dependencies
 [to do]
 
-### Installation on robot controller 
-1.  From the `krc_files` directory, copy the file `RSI_Ethernet.src` to the directory `KRC:\R1\Program` on the robot controller
-2.  Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller
-    - *Expert* user group is required
+### Installation on robot controller
+1.  Change user group to *Expert*
+    - E.g. `Main menu` -> `User group` -> `Expert`
+2.  From the `krc_files` directory, copy the file `RSI_Ethernet.src` to the directory `KRC:\R1\Program` on the robot controller
+    - E.g. using a USB stick
+3.  Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller
 
 ### Building
 1.  Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
