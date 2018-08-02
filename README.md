@@ -28,6 +28,11 @@ Status: Early development**
 ## Installation
 
 ### Dependencies
+
+#### ROS packages
+[to do]
+
+#### Robot controller
 [to do]
 
 ### Installation on robot controller
@@ -37,7 +42,7 @@ Status: Early development**
     - E.g. using a USB stick
 3.  Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller
 
-### Building
+### Building the `kuka_rsi_ros_interface` packages
 1.  Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
 2.  Build the packages using catkin (Note: tested with catkin_tools only)
     - E.g. `$ catkin build`
