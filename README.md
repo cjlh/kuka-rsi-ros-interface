@@ -35,7 +35,7 @@ Status: Early development**
 2. Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller (*Expert* user group is required)
 
 ### Building
-1. Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (i.e. `~/catkin_ws/src`)
+1. Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
 2. Build the packages using catkin (Note: tested with catkin_tools only)
 
 
