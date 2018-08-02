@@ -37,7 +37,7 @@ Status: Early development**
 
 ### Installation on robot controller
 1.  Change user group to *Expert* on robot controller/KUKA smartPAD
-    - E.g. `Main menu` -> `User group` -> `Expert`
+    - `Main menu` -> `User group` -> `Expert`
 2.  From the `krc_files` directory, copy the file `RSI_Ethernet.src` to the directory `KRC:\R1\Program` on the robot controller
     - E.g. using a USB stick
 3.  Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller
