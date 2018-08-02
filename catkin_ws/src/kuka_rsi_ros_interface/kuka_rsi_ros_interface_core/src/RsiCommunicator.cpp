@@ -10,11 +10,15 @@
 // Class header
 #include "RsiCommunicator.h"
 
+// Package classes
+#include "KukaPose.h"
+
 
 /*
  * TODO.
  */
-RsiCommunicator::RsiCommunicator(const char* ip_address, uint16_t port,
+RsiCommunicator::RsiCommunicator(const char* ip_address,
+                                 uint16_t port,
                                  int buffer_size) {
     this->port = port;
     this->ip_address = ip_address;
@@ -101,7 +105,7 @@ void RsiCommunicator::initiate() {
 
 
 /*
- * TODO: IMPLEMENT PROPER RAII DESIGN. (SO: 21511806)
+ * TODO.
  */
 void RsiCommunicator::closeSocket() {
     ROS_WARN("Closing socket.");
@@ -133,5 +137,19 @@ std::string RsiCommunicator::receiveDataFromController() {
  * TODO.
  */
 bool RsiCommunicator::sendInstructionToController(const char* instruction) {
+    return true;
+}
+
+/*
+ * TODO.
+ */
+KukaPose RsiCommunicator::getCurrentPosition() {
+    return KukaPose(1, 1, 1, 1, 1, 1);
+}
+
+/*
+ * TODO.
+ */
+bool RsiCommunicator::moveToPosition(KukaPose pose) {
     return true;
 }

@@ -26,6 +26,7 @@ set(src_files
 	${PROJECT_SOURCE_DIR}/src/main.cpp
 	${PROJECT_SOURCE_DIR}/src/KukaRsiRosInterface.cpp
 	${PROJECT_SOURCE_DIR}/src/RsiCommunicator.cpp
+	${PROJECT_SOURCE_DIR}/src/KukaPose.cpp
 )
 
 add_executable(kuka_rsi_ros_interface ${src_files})

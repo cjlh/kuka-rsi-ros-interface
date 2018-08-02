@@ -6,8 +6,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+// Package classes
+#include "KukaPose.h"
 
-// Set buffer size for server
 
 /*
  * TODO.
@@ -57,7 +58,7 @@ class RsiCommunicator
         ~RsiCommunicator();
 
         /*
-         *
+         * TODO.
          */
         bool setSocketTimeout(long sec, long usec);
 
@@ -77,6 +78,16 @@ class RsiCommunicator
          * TODO.
          */
         std::string receiveDataFromController();
+
+        /*
+         *
+         */
+        KukaPose getCurrentPosition();
+
+        /*
+         * TODO.
+         */
+        bool moveToPosition(KukaPose pose);
 };
 
 #endif /* RsiCommunicator */
