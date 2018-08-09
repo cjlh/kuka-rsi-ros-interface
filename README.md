@@ -5,7 +5,7 @@
 
 A ROS node for the manipulation of a KUKA robot arm via RSI 3.
 
-Developed for ROS Kinetic and tested on Ubuntu 16.04.
+Developed for ROS Kinetic and tested on Ubuntu 16.04. Tested using the KR C4 Compact controller with a KR 3 AGILUS robot arm.
 
 **Keywords:** ros, kinetic, rsi, kuka
 
