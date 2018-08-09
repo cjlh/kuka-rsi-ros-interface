@@ -21,17 +21,31 @@ Status: Early development**
 
 ### Thanks to...
 
-- Dalton Nuclear Institute (http://www.dalton.manchester.ac.uk/) for funding this project and granting permission to publish as open source;
+- **The University of Manchester's** Dalton Nuclear Institute (http://www.dalton.manchester.ac.uk/) for funding this project and granting permission to publish as open source;
 - Eren Sezener and Osman Kaya from the Ozyegin University Robotics Laboratory for helping me to understand the RSI protocol through their work on the *KUKA RSI-3 Communicator* project (https://github.com/erensezener/kuka-rsi3-communicator).
 
 
 ## Installation
 
 ### Dependencies
+
+#### ROS packages
 [to do]
 
-### Building 
+#### Robot controller
 [to do]
+
+### Installation on robot controller
+1.  Change user group to *Expert* on robot controller/KUKA smartPAD
+    - `Main menu` -> `User group` -> `Expert`
+2.  From the `krc_files` directory, copy the file `RSI_Ethernet.src` to the directory `KRC:\R1\Program` on the robot controller
+    - E.g. using a USB stick
+3.  Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller
+
+### Building the `kuka_rsi_ros_interface` packages
+1.  Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
+2.  Build the packages using catkin (Note: tested with catkin_tools only)
+    - E.g. `$ catkin build`
 
 
 ## Usage
