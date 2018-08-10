@@ -75,20 +75,6 @@ bool KukaRsiRosInterface::movetoPositionCallback(
 }
 
 
-/*
- * Returns a string with correct timestamp given some data received from
- * the robot controller and data that is to be sent.
- */
-std::string KukaRsiRosInterface::updateMessageTimestamp(
-		std::string received_data,
-        std::string data_to_send) {
-    // Read <IPOC> tag from received_data
-    // Set <IPOD> tag in data_to_send to received_data value
-    // Return new string
-    return "TODO";
-}
-
-
 void KukaRsiRosInterface::run() {
     try {
         rsi_comm->initiate();
@@ -108,7 +94,8 @@ void KukaRsiRosInterface::run() {
         // Continue receiving data from the robot controller and send default
         // response to keep RSI alive.
 
-        std::string response;
+        // Get response data from controller as XML
+        TiXmlDocument response;
         try {
             response = rsi_comm->receiveDataFromController();
         } catch (const std::exception &e) {
@@ -116,9 +103,22 @@ void KukaRsiRosInterface::run() {
             throw;
         }
 
-        // process message received from controller (i.e. update timestamp)
+        // Update timestamp of default message to the timestamp received from
+        // the controller.
+        TiXmlDocument instruction;
+        try {
+            instruction =
+                rsi_comm->updateMessageTimestamp(response, default_command);
+        } catch (const std::exception &e) {
+            throw;
+        }
 
-        // return message to controller
-        // rsi_comm->sendInstructionToController(instruction);
+        // Return message to controller to keep RSI alive.
+        try {
+            bool send_data = rsi_comm->sendInstructionToController(instruction);
+        } catch (const std::exception &e) {
+            ROS_ERROR("Problem communicating with robot controller.");
+            throw;
+        }
     }
 }

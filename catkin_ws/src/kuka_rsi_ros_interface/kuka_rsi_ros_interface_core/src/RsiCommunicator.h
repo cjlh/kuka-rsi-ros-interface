@@ -6,6 +6,9 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+// XML parsing
+#include <tinyxml.h>
+
 // Package classes
 #include "KukaPose.h"
 
@@ -39,7 +42,12 @@ class RsiCommunicator
         /*
          * Structure to store address information for the UDP socket.
          */
-        struct sockaddr_in address;
+        struct sockaddr_in in_address;
+
+        /*
+         * Structure to store address information for the controller.
+         */
+        struct sockaddr_in out_address;
 
         /*
          * Stores length of the address structure for easy reference.
@@ -72,12 +80,21 @@ class RsiCommunicator
          */
         void closeSocket();
 
-        bool sendInstructionToController(const char* instruction);
+        /*
+         * TODO.
+         */
+        TiXmlDocument updateMessageTimestamp(TiXmlDocument received_data,
+                                             TiXmlDocument data_to_send);
 
         /*
          * TODO.
          */
-        std::string receiveDataFromController();
+        bool sendInstructionToController(TiXmlDocument instruction);
+
+        /*
+         * TODO.
+         */
+        TiXmlDocument receiveDataFromController();
 
         /*
          *

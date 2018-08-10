@@ -67,7 +67,6 @@ class KukaRsiRosInterface
             kuka_rsi_ros_interface_msgs::MoveToPose::Request &request,
             kuka_rsi_ros_interface_msgs::MoveToPose::Response &response);
 
-
         /*
          * Returns a string with correct timestamp given some data received from
          * the robot controller and data that is to be sent.

@@ -7,6 +7,9 @@
 // ROS headers
 #include <ros/ros.h>
 
+// XML parsing
+#include <tinyxml.h>
+
 // Class header
 #include "RsiCommunicator.h"
 
@@ -39,14 +42,14 @@ RsiCommunicator::RsiCommunicator(const char* ip_address,
     }
 
     // Configure socket address
-    this->addrlen = sizeof(this->address);
-    this->address.sin_family = AF_INET;
-    this->address.sin_addr.s_addr = inet_addr(ip_address);
-    this->address.sin_port = htons(port);
+    this->addrlen = sizeof(this->in_address);
+    this->in_address.sin_family = AF_INET;
+    this->in_address.sin_addr.s_addr = inet_addr(ip_address);
+    this->in_address.sin_port = htons(port);
     
     // Bind socket to address/port
-    if (bind(this->server_fd, (struct sockaddr *) &(this->address),
-             sizeof(address)) < 0) {
+    if (bind(this->server_fd, (struct sockaddr *) &(this->in_address),
+             sizeof(in_address)) < 0) {
         ROS_ERROR("Failed to bind socket to %s:%u.", ip_address, this->port);
         throw std::exception();
     }
@@ -116,13 +119,17 @@ void RsiCommunicator::closeSocket() {
 /*
  * TODO: sort syntax styling
  */
-std::string RsiCommunicator::receiveDataFromController() {
+TiXmlDocument RsiCommunicator::receiveDataFromController() {
     char buffer[this->buffer_size] = {0};
-    int recvlen = recvfrom(this->server_fd, buffer, this->buffer_size, 0,
-                           (struct sockaddr *) &(this->address),
+    int recvlen = recvfrom(this->server_fd,
+                           buffer,
+                           this->buffer_size,
+                           0,
+                           (struct sockaddr *) &(this->out_address),
                            &(this->addrlen));
     if (recvlen == -1) {
-        ROS_ERROR("Robot controller is not sending data.");
+        ROS_ERROR("Could not receive data from robot controller (%s).",
+                  strerror(errno));
         close(this->server_fd);
         throw std::exception();
     } else {
@@ -130,15 +137,92 @@ std::string RsiCommunicator::receiveDataFromController() {
         buffer[recvlen] = 0;
         ROS_INFO("Received data:\n\"%s\"", buffer);
     }
-    return std::string(buffer, this->buffer_size);
+    std::string response_str(buffer, this->buffer_size);
+
+    // Parse response as XML.
+    TiXmlDocument response_xml;
+    response_xml.Parse(response_str.c_str(), 0, TIXML_ENCODING_UTF8);
+    return response_xml;
 }
+
+
+/*
+ * Returns a string with correct timestamp given some data received from
+ * the robot controller and data that is to be sent.
+ */
+TiXmlDocument RsiCommunicator::updateMessageTimestamp(
+        TiXmlDocument received_data,
+        TiXmlDocument data_to_send) {
+    // Read <IPOC> tag from received_data
+    // Set <IPOD> tag in data_to_send to received_data value
+    // Return new string
+
+    // Get timestamp value
+    std::string timestamp;
+    //TiXmlElement* received_data_root = received_data.RootElement();
+    //timestamp = received_data_root->Attribute("IPOC");
+
+    TiXmlHandle received_data_handle(&received_data);
+    TiXmlElement* received_ipoc_elem = 
+        received_data_handle.FirstChild("Rob").Child("IPOC", 0).ToElement();
+
+    if (!received_ipoc_elem) {
+        ROS_ERROR("Received RSI XML data could not be parsed (no timestamp).");
+        throw std::exception();
+    }
+
+    std::string ipoc_value = std::string(received_ipoc_elem->GetText());
+    ROS_INFO("Updating timestamp for IPOC: %s.", ipoc_value.c_str());
+
+    TiXmlHandle data_to_send_handle(&data_to_send);
+    TiXmlText* to_send_ipoc_text = data_to_send_handle.FirstChild("Sen")
+                                                      .Child("IPOC", 0)
+                                                      .FirstChild()
+                                                      .ToText();
+
+    if (!to_send_ipoc_text) {
+        ROS_ERROR("Response RSI XML data could not be parsed (no timestamp).");
+        throw std::exception();
+    }
+
+    to_send_ipoc_text->SetValue(ipoc_value.c_str());
+
+    return data_to_send;
+}
+
 
 /*
  * TODO.
+ * TODO: Decide if function should accept a string instead of TiXmlDocument.
  */
-bool RsiCommunicator::sendInstructionToController(const char* instruction) {
-    return true;
+bool RsiCommunicator::sendInstructionToController(TiXmlDocument instruction) {
+    // Use a tinyxml printer to convert the instruction to a string
+    TiXmlPrinter printer;
+    printer.SetIndent("");
+    printer.SetLineBreak("");
+    instruction.Accept(&printer);
+
+    const char* data_to_send = printer.CStr();
+
+    // Store string in buffer
+    int send_data = sendto(this->server_fd,
+                           data_to_send,
+                           sizeof(data_to_send),
+                           0,
+                           (struct sockaddr *) &(this->out_address),
+                           this->addrlen);
+    if (send_data == -1) {
+        ROS_ERROR("Could not send data to robot controller (%s).",
+                  strerror(errno));
+        close(this->server_fd);
+        return false;
+    } else {
+        ROS_INFO("Sent %lu bytes.", sizeof(data_to_send));
+        ROS_INFO("Sent data:\n\"%s\"", data_to_send);
+        return true;
+    }
 }
+
 
 /*
  * TODO.
@@ -146,6 +230,7 @@ bool RsiCommunicator::sendInstructionToController(const char* instruction) {
 KukaPose RsiCommunicator::getCurrentPosition() {
     return KukaPose(1, 1, 1, 1, 1, 1);
 }
+
 
 /*
  * TODO.
