@@ -36,7 +36,7 @@ class KukaRsiRosInterface
         /*
          * TODO.
          */
-        TiXmlDocument default_command;
+        TiXmlDocument instruction_template;
 
     public:
         /*
@@ -68,11 +68,41 @@ class KukaRsiRosInterface
             kuka_rsi_ros_interface_msgs::MoveToPose::Response &response);
 
         /*
-         * Returns a string with correct timestamp given some data received from
-         * the robot controller and data that is to be sent.
+         * TODO.
          */
-        std::string updateMessageTimestamp(std::string received_data,
-                                           std::string data_to_send);
+        TiXmlDocument cloneTiXmlDocument(TiXmlDocument original);
+
+        /*
+         * TODO.
+         */
+        KukaPose getPositionDataFromResponse(TiXmlDocument response);
+
+        /*
+         * TODO.
+         */
+        KukaPose getCurrentPosition();
+
+        /*
+         * TODO.
+         */
+        bool arePositionValuesWithinThreshold(double threshold,
+                                              KukaPose pose1,
+                                              KukaPose pose2);
+
+        /*
+         * TODO.
+         */
+        double calculateAdjustmentValue(double current_val,
+                                        double target_val,
+                                        const double dist_threshold,
+                                        const double base_adj,
+                                        const double max_adj,
+                                        const double diff_divisor);
+
+        /*
+         * TODO.
+         */
+        bool moveToPosition(KukaPose target_pose);
 
         /*
          * TODO.

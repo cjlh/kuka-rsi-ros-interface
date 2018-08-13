@@ -3,6 +3,8 @@
 #include <cstring>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdlib.h>
+#include <algorithm>
 
 // ROS headers
 #include <ros/ros.h>
@@ -82,70 +84,9 @@ bool RsiCommunicator::setSocketTimeout(long sec, long usec) {
 /*
  * TODO.
  */
-void RsiCommunicator::initiate(TiXmlDocument initial_instruction) {
-    // TODO: implement ctrl+c interrupt
-    ROS_INFO("Waiting to receive data from RSI on %s:%u...",
-             this->ip_address.c_str(),
-             this->port);
-
-    // Receive initial data from RSI
-    try {
-        // TODO: get rid of this ugly code and implement interrupt instead as a
-        // matter of priority
-        TiXmlDocument response = receiveDataFromController();
-        TiXmlDocument instruction =
-            updateMessageTimestamp(response, initial_instruction);
-        bool send_data = sendInstructionToController(instruction);
-    } catch (const std::exception &e) {
-        throw;
-    }
-
-    // Set socket timeout for further data exchange
-    bool is_timeout_set = setSocketTimeout(5, 0);
-
-    if (!is_timeout_set)  {
-        ROS_ERROR("Could not configure socket timeout for further data "
-                  "exchange.");
-    }
-}
-
-
-/*
- * TODO.
- */
 void RsiCommunicator::closeSocket() {
     ROS_WARN("Closing socket.");
     close(this->server_fd);
-}
-
-
-/*
- * TODO: sort syntax styling
- */
-TiXmlDocument RsiCommunicator::receiveDataFromController() {
-    char buffer[this->buffer_size] = {0};
-    int recvlen = recvfrom(this->server_fd,
-                           buffer,
-                           this->buffer_size,
-                           0,
-                           (struct sockaddr *) &(this->out_address),
-                           &(this->addrlen));
-    if (recvlen == -1) {
-        ROS_ERROR("Could not receive data from robot controller (%s).",
-                  strerror(errno));
-        close(this->server_fd);
-        throw std::exception();
-    } else {
-        ROS_INFO("Received %d bytes.", recvlen);
-        buffer[recvlen] = 0;
-        ROS_INFO("Received data:\n\"%s\"", buffer);
-    }
-    std::string response_str(buffer, this->buffer_size);
-
-    // Parse response as XML.
-    TiXmlDocument response_xml;
-    response_xml.Parse(response_str.c_str(), 0, TIXML_ENCODING_UTF8);
-    return response_xml;
 }
 
 
@@ -157,6 +98,7 @@ TiXmlDocument RsiCommunicator::updateMessageTimestamp(
         TiXmlDocument received_data, TiXmlDocument data_to_send) {
     // Create a handle for accessing the XML data.
     TiXmlHandle received_data_handle(&received_data);
+
     // Get a pointer to the contents of controller <IPOC> tags
     TiXmlElement* received_ipoc_elem = 
         received_data_handle.FirstChild("Rob").Child("IPOC", 0).ToElement();
@@ -192,6 +134,67 @@ TiXmlDocument RsiCommunicator::updateMessageTimestamp(
 
 /*
  * TODO.
+ */
+void RsiCommunicator::initiate(TiXmlDocument initial_instruction) {
+    // TODO: implement ctrl+c interrupt
+    ROS_INFO("Waiting to receive data from RSI on %s:%u...",
+             this->ip_address.c_str(),
+             this->port);
+
+    // Receive initial data from RSI
+    try {
+        // TODO: get rid of this ugly code and implement interrupt instead as a
+        // matter of priority
+        TiXmlDocument response = receiveDataFromController();
+        TiXmlDocument instruction =
+            updateMessageTimestamp(response, initial_instruction);
+        bool send_data = sendInstructionToController(instruction);
+    } catch (const std::exception &e) {
+        throw;
+    }
+
+    // Set socket timeout for further data exchange
+    bool is_timeout_set = setSocketTimeout(5, 0);
+
+    if (!is_timeout_set)  {
+        ROS_ERROR("Could not configure socket timeout for further data "
+                  "exchange.");
+    }
+}
+
+
+/*
+ * TODO: sort syntax styling
+ */
+TiXmlDocument RsiCommunicator::receiveDataFromController() {
+    char buffer[this->buffer_size] = {0};
+    int recvlen = recvfrom(this->server_fd,
+                           buffer,
+                           this->buffer_size,
+                           0,
+                           (struct sockaddr *) &(this->out_address),
+                           &(this->addrlen));
+    if (recvlen == -1) {
+        ROS_ERROR("Could not receive data from robot controller (%s).",
+                  strerror(errno));
+        close(this->server_fd);
+        throw std::exception();
+    } else {
+        ROS_INFO("Received %d bytes.", recvlen);
+        buffer[recvlen] = 0;
+        ROS_INFO("Received data:\n\"%s\"", buffer);
+    }
+    std::string response_str(buffer, this->buffer_size);
+
+    // Parse response as XML.
+    TiXmlDocument response_xml;
+    response_xml.Parse(response_str.c_str(), 0, TIXML_ENCODING_UTF8);
+    return response_xml;
+}
+
+
+/*
+ * TODO.
  * TODO: Decide if function should accept a string instead of TiXmlDocument.
  */
 bool RsiCommunicator::sendInstructionToController(TiXmlDocument instruction) {
@@ -218,24 +221,8 @@ bool RsiCommunicator::sendInstructionToController(TiXmlDocument instruction) {
         close(this->server_fd);
         return false;
     } else {
-        ROS_INFO("Sent %lu bytes.", sizeof(data_to_send));
+        ROS_INFO("Sent %lu bytes.", strlen(data_to_send));
         ROS_INFO("Sent data:\n\"%s\"", data_to_send);
         return true;
     }
-}
-
-
-/*
- * TODO.
- */
-KukaPose RsiCommunicator::getCurrentPosition() {
-    return KukaPose(1, 1, 1, 1, 1, 1);
-}
-
-
-/*
- * TODO.
- */
-bool RsiCommunicator::moveToPosition(KukaPose pose) {
-    return true;
 }

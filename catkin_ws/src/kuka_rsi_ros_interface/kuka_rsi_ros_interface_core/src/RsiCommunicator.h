@@ -73,18 +73,19 @@ class RsiCommunicator
         /*
          * TODO.
          */
-        void initiate(TiXmlDocument initial_instruction);
-
-        /*
-         * TODO.
-         */
         void closeSocket();
 
         /*
-         * TODO.
+         * Returns a string with correct timestamp given some data received from
+         * the robot controller and data that is to be sent.
          */
         TiXmlDocument updateMessageTimestamp(TiXmlDocument received_data,
                                              TiXmlDocument data_to_send);
+
+        /*
+         * TODO.
+         */
+        void initiate(TiXmlDocument initial_instruction);
 
         /*
          * TODO.
@@ -95,16 +96,6 @@ class RsiCommunicator
          * TODO.
          */
         TiXmlDocument receiveDataFromController();
-
-        /*
-         *
-         */
-        KukaPose getCurrentPosition();
-
-        /*
-         * TODO.
-         */
-        bool moveToPosition(KukaPose pose);
 };
 
 #endif /* RsiCommunicator */
