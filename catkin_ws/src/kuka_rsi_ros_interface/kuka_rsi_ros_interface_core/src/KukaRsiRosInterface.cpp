@@ -77,7 +77,7 @@ bool KukaRsiRosInterface::movetoPositionCallback(
 
 void KukaRsiRosInterface::run() {
     try {
-        rsi_comm->initiate();
+        rsi_comm->initiate(this->default_command);
     } catch (const std::exception &e) {
         ROS_ERROR("Problem initiating communication with robot controller.");
         throw;
@@ -108,7 +108,8 @@ void KukaRsiRosInterface::run() {
         TiXmlDocument instruction;
         try {
             instruction =
-                rsi_comm->updateMessageTimestamp(response, default_command);
+                rsi_comm->updateMessageTimestamp(response,
+                                                 this->default_command);
         } catch (const std::exception &e) {
             throw;
         }

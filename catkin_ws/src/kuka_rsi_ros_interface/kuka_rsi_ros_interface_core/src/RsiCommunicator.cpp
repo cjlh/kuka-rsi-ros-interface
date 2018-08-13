@@ -82,7 +82,7 @@ bool RsiCommunicator::setSocketTimeout(long sec, long usec) {
 /*
  * TODO.
  */
-void RsiCommunicator::initiate() {
+void RsiCommunicator::initiate(TiXmlDocument initial_instruction) {
     // TODO: implement ctrl+c interrupt
     ROS_INFO("Waiting to receive data from RSI on %s:%u...",
              this->ip_address.c_str(),
@@ -92,7 +92,10 @@ void RsiCommunicator::initiate() {
     try {
         // TODO: get rid of this ugly code and implement interrupt instead as a
         // matter of priority
-        receiveDataFromController();
+        TiXmlDocument response = receiveDataFromController();
+        TiXmlDocument instruction =
+            updateMessageTimestamp(response, initial_instruction);
+        bool send_data = sendInstructionToController(instruction);
     } catch (const std::exception &e) {
         throw;
     }
@@ -151,18 +154,10 @@ TiXmlDocument RsiCommunicator::receiveDataFromController() {
  * the robot controller and data that is to be sent.
  */
 TiXmlDocument RsiCommunicator::updateMessageTimestamp(
-        TiXmlDocument received_data,
-        TiXmlDocument data_to_send) {
-    // Read <IPOC> tag from received_data
-    // Set <IPOD> tag in data_to_send to received_data value
-    // Return new string
-
-    // Get timestamp value
-    std::string timestamp;
-    //TiXmlElement* received_data_root = received_data.RootElement();
-    //timestamp = received_data_root->Attribute("IPOC");
-
+        TiXmlDocument received_data, TiXmlDocument data_to_send) {
+    // Create a handle for accessing the XML data.
     TiXmlHandle received_data_handle(&received_data);
+    // Get a pointer to the contents of controller <IPOC> tags
     TiXmlElement* received_ipoc_elem = 
         received_data_handle.FirstChild("Rob").Child("IPOC", 0).ToElement();
 
@@ -171,9 +166,11 @@ TiXmlDocument RsiCommunicator::updateMessageTimestamp(
         throw std::exception();
     }
 
+    // Get the value of the contents of the <IPOC> tags
     std::string ipoc_value = std::string(received_ipoc_elem->GetText());
     ROS_INFO("Updating timestamp for IPOC: %s.", ipoc_value.c_str());
 
+    // Get a pointer to the target text between the <IPOC> tags
     TiXmlHandle data_to_send_handle(&data_to_send);
     TiXmlText* to_send_ipoc_text = data_to_send_handle.FirstChild("Sen")
                                                       .Child("IPOC", 0)
@@ -185,6 +182,8 @@ TiXmlDocument RsiCommunicator::updateMessageTimestamp(
         throw std::exception();
     }
 
+    // Set the value of the target <IPOC> contents to the value of the
+    // controller <IPOC> contents.
     to_send_ipoc_text->SetValue(ipoc_value.c_str());
 
     return data_to_send;
@@ -196,7 +195,8 @@ TiXmlDocument RsiCommunicator::updateMessageTimestamp(
  * TODO: Decide if function should accept a string instead of TiXmlDocument.
  */
 bool RsiCommunicator::sendInstructionToController(TiXmlDocument instruction) {
-    // Use a tinyxml printer to convert the instruction to a string
+    // Use a tinyxml printer to convert the instruction to a string.
+    // Remove unnecessary whitespace for transmission.
     TiXmlPrinter printer;
     printer.SetIndent("");
     printer.SetLineBreak("");
@@ -204,10 +204,11 @@ bool RsiCommunicator::sendInstructionToController(TiXmlDocument instruction) {
 
     const char* data_to_send = printer.CStr();
 
-    // Store string in buffer
+    // Send instruction to the robot controller, which is stored in out_address
+    // when communication is first initiated.
     int send_data = sendto(this->server_fd,
                            data_to_send,
-                           sizeof(data_to_send),
+                           strlen(data_to_send),
                            0,
                            (struct sockaddr *) &(this->out_address),
                            this->addrlen);

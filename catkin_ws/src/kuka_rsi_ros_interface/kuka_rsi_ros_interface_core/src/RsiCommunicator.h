@@ -73,7 +73,7 @@ class RsiCommunicator
         /*
          * TODO.
          */
-        void initiate();
+        void initiate(TiXmlDocument initial_instruction);
 
         /*
          * TODO.
