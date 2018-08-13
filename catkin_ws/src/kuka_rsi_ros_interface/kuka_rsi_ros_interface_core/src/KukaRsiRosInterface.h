@@ -77,6 +77,11 @@ class KukaRsiRosInterface
         /*
          * TODO.
          */
+        bool communicationStep(TiXmlDocument instruction);
+
+        /*
+         * TODO.
+         */
         void run();
 };
 

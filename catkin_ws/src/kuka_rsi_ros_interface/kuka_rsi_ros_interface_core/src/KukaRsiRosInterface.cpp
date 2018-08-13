@@ -66,7 +66,7 @@ bool KukaRsiRosInterface::getPositionValuesCallback(
 
 
 /*
- *
+ * TODO.
  */
 bool KukaRsiRosInterface::movetoPositionCallback(
         kuka_rsi_ros_interface_msgs::MoveToPose::Request &request,
@@ -75,9 +75,36 @@ bool KukaRsiRosInterface::movetoPositionCallback(
 }
 
 
+/*
+ * TODO.
+ */
+bool KukaRsiRosInterface::communicationStep(TiXmlDocument instruction) {
+    try {
+        // Get response data from controller as XML
+        TiXmlDocument response = this->rsi_comm->receiveDataFromController();
+
+        // Update timestamp of instruction to the timestamp received from
+        // the controller.
+        instruction =
+            this->rsi_comm->updateMessageTimestamp(response, instruction);
+
+        // Send instruction to robot controller.
+        bool send_data =
+            this->rsi_comm->sendInstructionToController(instruction);
+
+        return send_data;
+    } catch (const std::exception &e) {
+        return false;
+    }
+}
+
+
+/*
+ * TODO.
+ */
 void KukaRsiRosInterface::run() {
     try {
-        rsi_comm->initiate(this->default_command);
+        this->rsi_comm->initiate(this->default_command);
     } catch (const std::exception &e) {
         ROS_ERROR("Problem initiating communication with robot controller.");
         throw;
@@ -94,32 +121,11 @@ void KukaRsiRosInterface::run() {
         // Continue receiving data from the robot controller and send default
         // response to keep RSI alive.
 
-        // Get response data from controller as XML
-        TiXmlDocument response;
-        try {
-            response = rsi_comm->receiveDataFromController();
-        } catch (const std::exception &e) {
-            ROS_ERROR("Problem communicating with robot controller.");
-            throw;
-        }
+        bool is_alive = communicationStep(this->default_command);
 
-        // Update timestamp of default message to the timestamp received from
-        // the controller.
-        TiXmlDocument instruction;
-        try {
-            instruction =
-                rsi_comm->updateMessageTimestamp(response,
-                                                 this->default_command);
-        } catch (const std::exception &e) {
-            throw;
-        }
-
-        // Return message to controller to keep RSI alive.
-        try {
-            bool send_data = rsi_comm->sendInstructionToController(instruction);
-        } catch (const std::exception &e) {
+        if (!is_alive) {
             ROS_ERROR("Problem communicating with robot controller.");
-            throw;
+            throw std::exception();
         }
     }
 }
