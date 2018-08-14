@@ -12,7 +12,7 @@ Developed for ROS Kinetic and tested on Ubuntu 16.04. Tested using the KR C4 Com
 
 ### License
 
-The source code is released under the [GNU General Public License v3.0](kuka_rsi_ros_interface/LICENSE).
+The source code is released under the [GNU General Public License v3.0](LICENSE).
 
 **Author: Caleb Hamilton (cjlhamilton@gmail.com)  
 Maintainer: Caleb Hamilton (cjlhamilton@gmail.com)  
