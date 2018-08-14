@@ -4,6 +4,16 @@
 /*
  * TODO: Consider if this could be replaced by a struct - although private
  * data members are intended it would be simpler.
+ *
+ * A robot position with angles
+ *     {A1: 0, A2: -90, A3: 90, A4: 0, A5: 90, A6: 0}
+ * would have the following values:
+ *     x: 320.0
+ *     y: 0.0
+ *     z: 550.0
+ *     a: 0.0?
+ *     b: 0.0?
+ *     c: 0.0?
  */
 class KukaPose
 {

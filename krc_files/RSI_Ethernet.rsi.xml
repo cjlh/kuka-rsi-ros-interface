@@ -139,7 +139,7 @@
       <Parameter Name="UpperLimX" ParamID="4" ParamValue="1000" />
       <Parameter Name="UpperLimY" ParamID="5" ParamValue="1000" />
       <Parameter Name="UpperLimZ" ParamID="6" ParamValue="1000" />
-      <Parameter Name="MaxRotAngle" ParamID="7" ParamValue="45" />
+      <Parameter Name="MaxRotAngle" ParamID="7" ParamValue="180" />
       <Parameter Name="RefCorrSys" ParamID="1" ParamValue="1" IsRuntime="false" />
     </Parameters>
   </RSIObject>
@@ -147,7 +147,7 @@
     <Parameters>
       <!-- TODO: Need to properly set these!! -->
       <Parameter Name="MaxTrans" ParamID="1" ParamValue="10000" />
-      <Parameter Name="MaxRotAngle" ParamID="2" ParamValue="90" />
+      <Parameter Name="MaxRotAngle" ParamID="2" ParamValue="180" />
     </Parameters>
 </RSIObject>
 </RSIObjects>

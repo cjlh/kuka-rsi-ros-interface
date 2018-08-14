@@ -92,12 +92,16 @@ class KukaRsiRosInterface
         /*
          * TODO.
          */
-        double calculateAdjustmentValue(double current_val,
-                                        double target_val,
-                                        const double dist_threshold,
-                                        const double base_adj,
-                                        const double max_adj,
-                                        const double diff_divisor);
+        double calculateCoordinateAdjustmentValue(double current_val,
+                                                  double target_val,
+                                                  double dist_threshold);
+
+        /*
+         * TODO.
+         */
+        double calculateOrientationAdjustmentValue(double current_val,
+                                                   double target_val,
+                                                   double dist_threshold);
 
         /*
          * TODO.

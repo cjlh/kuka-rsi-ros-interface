@@ -178,11 +178,60 @@ bool KukaRsiRosInterface::arePositionValuesWithinThreshold(double threshold,
 /*
  * TODO.
  */
-double KukaRsiRosInterface::calculateAdjustmentValue(
-        double current_val, double target_val,
-        const double dist_threshold, const double base_adj,
-        const double max_adj, const double diff_divisor) {
+double KukaRsiRosInterface::calculateCoordinateAdjustmentValue(
+        double current_val, double target_val, double dist_threshold) {
+    const double base_adj     = 0.02;
+    const double max_adj      = 0.1;
+    const double diff_divisor = 850.0;
+
     double diff = target_val - current_val;
+    if (abs(diff) > dist_threshold) {
+        if (current_val < target_val) {
+            // Need to increase the value.
+            return std::min(max_adj, base_adj + (diff / diff_divisor));
+        } else {
+            // Need to decrease the value.
+            return std::max(-max_adj, -base_adj + (diff / diff_divisor));
+        }
+    } else {
+        return 0.0;
+    }
+}
+
+
+/*
+ * TODO.
+ */
+double KukaRsiRosInterface::calculateOrientationAdjustmentValue(
+        double current_val, double target_val, double dist_threshold) {
+    const double base_adj     = 0.025;
+    const double max_adj      = 0.035;
+    const double diff_divisor = 900.0;
+
+    // Treat anything above 179.8 degrees and below -179.8 degrees as
+    // equivalent. This will solve jittering issues around these values.
+    if (179.9 <= abs(current_val) && 179.9 <= abs(target_val)) {
+        ROS_WARN("Treating as 0");
+        return 0.0;
+    }
+
+    // Annoyingly, the orientation values reported by the controller seem to
+    // range from 0 to -180 and then jump to 180 down to 0 again. To get around
+    // this, the value reported by the controller must be inverted so that
+    // orientation values may be continuous between -180 and 180.
+    //
+    // This does need checked, but that's what it seems like is happening.
+    // May need to switch to angle adjustments rather than coordinate
+    // adjustments.
+
+    if (current_val > 0) {
+        current_val = 180 - current_val;
+    } else if (current_val < 0) {
+        current_val = -180 - current_val;
+    }
+
+    double diff = target_val - current_val;
+
     if (abs(diff) > dist_threshold) {
         if (current_val < target_val) {
             // Need to increase the value.
@@ -204,11 +253,8 @@ double KukaRsiRosInterface::calculateAdjustmentValue(
 bool KukaRsiRosInterface::moveToPosition(KukaPose target_pose) {
     // Define magic adjustment heuristics. <|:^0 /***
     const double dist_threshold = 0.5;
-    const double base_adj       = 0.02;
-    const double max_adj        = 0.1;
-    const double diff_divisor   = 850.0;
 
-    ROS_INFO("Moving to target position:\n"
+    ROS_INFO("Moving to target position: "
              "X: %2f, Y: %2f, Z: %2f, A: %2f, B: %2f, C: %2f",
              target_pose.getX(), target_pose.getY(), target_pose.getZ(),
              target_pose.getA(), target_pose.getB(), target_pose.getC());
@@ -232,47 +278,29 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose target_pose) {
         // If not within threshold distance of target pose, make adjustment,
         // otherwise adjust by 0.
         
-        double x_adj = calculateAdjustmentValue(current_pose.getX(),
-                                                target_pose.getX(),
-                                                dist_threshold,
-                                                base_adj,
-                                                max_adj,
-                                                diff_divisor);
+        double x_adj = calculateCoordinateAdjustmentValue(current_pose.getX(),
+                                                          target_pose.getX(),
+                                                          dist_threshold);
         
-        double y_adj = calculateAdjustmentValue(current_pose.getY(),
-                                                target_pose.getY(),
-                                                dist_threshold,
-                                                base_adj,
-                                                max_adj,
-                                                diff_divisor);
+        double y_adj = calculateCoordinateAdjustmentValue(current_pose.getY(),
+                                                          target_pose.getY(),
+                                                          dist_threshold);
         
-        double z_adj = calculateAdjustmentValue(current_pose.getZ(),
-                                                target_pose.getZ(),
-                                                dist_threshold,
-                                                base_adj,
-                                                max_adj,
-                                                diff_divisor);
+        double z_adj = calculateCoordinateAdjustmentValue(current_pose.getZ(),
+                                                          target_pose.getZ(),
+                                                          dist_threshold);
         
-        double a_adj = calculateAdjustmentValue(current_pose.getA(),
-                                                target_pose.getA(),
-                                                dist_threshold,
-                                                base_adj,
-                                                max_adj,
-                                                diff_divisor);
+        double a_adj = calculateOrientationAdjustmentValue(current_pose.getA(),
+                                                           target_pose.getA(),
+                                                           dist_threshold);
         
-        double b_adj = calculateAdjustmentValue(current_pose.getB(),
-                                                target_pose.getB(),
-                                                dist_threshold,
-                                                base_adj,
-                                                max_adj,
-                                                diff_divisor);
+        double b_adj = calculateOrientationAdjustmentValue(current_pose.getB(),
+                                                           target_pose.getB(),
+                                                           dist_threshold);
         
-        double c_adj = calculateAdjustmentValue(current_pose.getC(),
-                                                target_pose.getC(),
-                                                dist_threshold,
-                                                base_adj,
-                                                max_adj,
-                                                diff_divisor);
+        double c_adj = calculateOrientationAdjustmentValue(current_pose.getC(),
+                                                           target_pose.getC(),
+                                                           dist_threshold);
 
         // Create movement instruction by modifying XML of instruction template.
         TiXmlDocument instruction =
@@ -294,12 +322,36 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose target_pose) {
         }
 
         // Get value of each positioning attribute.
-        rkorr_elem->SetDoubleAttribute("X", x_adj);
-        rkorr_elem->SetDoubleAttribute("Y", y_adj);
-        rkorr_elem->SetDoubleAttribute("Z", z_adj);
-        rkorr_elem->SetDoubleAttribute("A", a_adj);
-        rkorr_elem->SetDoubleAttribute("B", b_adj);
-        rkorr_elem->SetDoubleAttribute("C", c_adj);
+        if (x_adj == 0.0) {
+            rkorr_elem->SetAttribute("X", "0.0");
+        } else {
+            rkorr_elem->SetDoubleAttribute("X", x_adj);
+        }
+        if (y_adj == 0.0) {
+            rkorr_elem->SetAttribute("Y", "0.0");
+        } else {
+            rkorr_elem->SetDoubleAttribute("Y", y_adj);
+        }
+        if (z_adj == 0.0) {
+            rkorr_elem->SetAttribute("Z", "0.0");
+        } else {
+            rkorr_elem->SetDoubleAttribute("Z", z_adj);
+        }
+        if (a_adj == 0.0) {
+            rkorr_elem->SetAttribute("A", "0.0");
+        } else {
+            rkorr_elem->SetDoubleAttribute("A", a_adj);
+        }
+        if (b_adj == 0.0) {
+            rkorr_elem->SetAttribute("B", "0.0");
+        } else {
+            rkorr_elem->SetDoubleAttribute("B", b_adj);
+        }
+        if (c_adj == 0.0) {
+            rkorr_elem->SetAttribute("C", "0.0");
+        } else {
+            rkorr_elem->SetDoubleAttribute("C", c_adj);
+        }
 
         // Send instruction to controller and re-loop
         bool success = this->rsi_comm->sendInstructionToController(instruction);
