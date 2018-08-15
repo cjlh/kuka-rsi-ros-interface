@@ -5,7 +5,7 @@
 
 A ROS node for the manipulation of a KUKA robot arm via RSI 3.
 
-Developed for ROS Kinetic and tested on Ubuntu 16.04. Tested using the KR C4 Compact controller with a KR 3 R540 robot arm.
+Developed for ROS Kinetic and tested on Ubuntu 16.04. Tested using a KR C4 Compact controller running KUKA System Software 8.3 with KUKA.RobotSensorInterface 3.3 and a KR 3 R540 robot arm.
 
 **Keywords:** ros, kinetic, rsi, kuka
 
@@ -25,14 +25,17 @@ Status: Early development**
 - Eren Sezener and Osman Kaya from the Ozyegin University Robotics Laboratory for helping me to understand the RSI protocol through their work on the *KUKA RSI-3 Communicator* project (https://github.com/erensezener/kuka-rsi3-communicator).
 
 
+## Prerequisites
+
+- The host PC running this software must be connected directly to the robot controller via Ethernet.
+  - For the KR C4 Compact controller the Ethernet cable should be connected to the X66 port.
+- The robot controller should be running KUKA System Software 8.3 with KUKA.RobotSensorInterface 3.3; different versions may be compatible but have not been tested.
+- ROS Kinetic must be installed on the host PC.
+
+
 ## Installation
 
-### Dependencies
-
-#### ROS packages
-[to do]
-
-#### Robot controller
+### ROS dependencies
 [to do]
 
 ### Installation on robot controller
@@ -48,7 +51,7 @@ Status: Early development**
     - E.g. `$ catkin build`
 
 
-## Usage
+## Usage and getting started
 
 ### Configuration
 [to do]
