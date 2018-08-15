@@ -30,7 +30,7 @@ Status: Early development**
 - The host PC running this software must be connected directly to the robot controller via Ethernet.
   - For the KR C4 Compact controller the Ethernet cable should be connected to the X66 port.
 - The robot controller should be running KUKA System Software 8.3 with KUKA.RobotSensorInterface 3.3; different versions may be compatible but have not been tested.
-- ROS Kinetic must be installed on the host PC.
+- ROS Kinetic must be installed on the host PC, along with the packages listed in the 'ROS dependencies' section below.
 
 
 ## Installation
