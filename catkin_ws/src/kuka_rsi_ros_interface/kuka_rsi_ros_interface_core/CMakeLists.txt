@@ -9,6 +9,8 @@ find_package(catkin	REQUIRED
 	kuka_rsi_ros_interface_msgs
 	cmake_modules
 	roslib
+  	tf
+  	angles
 )
 
 find_package(TinyXML REQUIRED)

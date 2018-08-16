@@ -99,13 +99,6 @@ class KukaRsiRosInterface
         /*
          * TODO.
          */
-        double calculateOrientationAdjustmentValue(double current_val,
-                                                   double target_val,
-                                                   double dist_threshold);
-
-        /*
-         * TODO.
-         */
         bool moveToPosition(KukaPose target_pose);
 
         /*
