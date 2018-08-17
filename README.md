@@ -14,8 +14,8 @@ Developed for ROS Kinetic and tested on Ubuntu 16.04. Tested using a KR C4 Compa
 
 The source code is released under the [GNU General Public License v3.0](LICENSE).
 
-**Author: Caleb Hamilton (cjlhamilton@gmail.com)  
-Maintainer: Caleb Hamilton (cjlhamilton@gmail.com)  
+**Author: Caleb Hamilton (c.j.l.hamilton@gmail.com)  
+Maintainer: Caleb Hamilton (c.j.l.hamilton@gmail.com)  
 Status: In development**
 
 
