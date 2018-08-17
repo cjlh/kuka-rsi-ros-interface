@@ -33,11 +33,7 @@
 #include "KukaPose.h"
 
 
-/*
- * TODO.
- */
-KukaRsiRosInterface::KukaRsiRosInterface(std::string node_name,
-                                         const char* ip_address,
+KukaRsiRosInterface::KukaRsiRosInterface(const char* ip_address,
                                          uint16_t port,
                                          int buffer_size,
                                          TiXmlDocument instruction_template) {
@@ -47,22 +43,15 @@ KukaRsiRosInterface::KukaRsiRosInterface(std::string node_name,
         throw;
     }
     ROS_INFO("UDP socket bound successfully.");
-    this->node_name = node_name;
     this->instruction_template = instruction_template;
 }
 
 
-/*
- * Destructor - ensure socket is closed on destruction.
- */
 KukaRsiRosInterface::~KukaRsiRosInterface() {
     delete rsi_comm;
 }
 
 
-/*
- * TODO.
- */
 bool KukaRsiRosInterface::getPositionValuesCallback(
         kuka_rsi_ros_interface_msgs::GetPose::Request &request,
         kuka_rsi_ros_interface_msgs::GetPose::Response &response) {
@@ -81,20 +70,28 @@ bool KukaRsiRosInterface::getPositionValuesCallback(
 }
 
 
-/*
- * TODO.
- */
 bool KukaRsiRosInterface::movetoPositionCallback(
         kuka_rsi_ros_interface_msgs::MoveToPose::Request &request,
         kuka_rsi_ros_interface_msgs::MoveToPose::Response &response) {
     ROS_INFO("Position movement request received.");
+    // Create a KukaPose object from the requested pose values.
     KukaPose goal_pose(request.pose.x,
                        request.pose.y,
                        request.pose.z,
                        request.pose.a,
                        request.pose.b,
                        request.pose.c);
-    bool success = moveToPosition(goal_pose);
+    // Move to the specified position.
+    bool success = false;
+    try {
+        success = moveToPosition(goal_pose);
+    } catch (const std::exception &e) {
+        // `moveToPosition` throws an std::exception if the XML template
+        // data cannot be read.
+        response.success = false;
+        response.message = "The RSI XML template data could not be read.";
+        return success;
+    }
     if (success) {
         response.success = true;
         response.message = "Successfully moved robot to specified position.";
@@ -106,10 +103,7 @@ bool KukaRsiRosInterface::movetoPositionCallback(
 }
 
 
-/*
- * TODO.
- */
-TiXmlDocument KukaRsiRosInterface::cloneTiXmlDocument(TiXmlDocument original) {
+TiXmlDocument KukaRsiRosInterface::cloneTiXmlDocument(TiXmlDocument &original) {
     TiXmlPrinter printer;
     printer.SetIndent("");
     printer.SetLineBreak("");
@@ -123,11 +117,8 @@ TiXmlDocument KukaRsiRosInterface::cloneTiXmlDocument(TiXmlDocument original) {
 }
 
 
-/*
- * TODO.
- */
 KukaPose KukaRsiRosInterface::getPositionDataFromResponse(
-        TiXmlDocument response) {
+        TiXmlDocument &response) {
     // Create a handle for accessing the XML data.
     TiXmlHandle response_handle(&response);
 
@@ -153,9 +144,6 @@ KukaPose KukaRsiRosInterface::getPositionDataFromResponse(
 }
 
 
-/*
- * TODO.
- */
 KukaPose KukaRsiRosInterface::getCurrentPosition() {
     TiXmlDocument response = this->rsi_comm->receiveDataFromController();
     // TODO: May need to respond here.
@@ -164,9 +152,6 @@ KukaPose KukaRsiRosInterface::getCurrentPosition() {
 }
 
 
-/*
- * TODO.
- */
 double KukaRsiRosInterface::calculateCoordinateAdjustmentValue(
         double current_val, double goal_val, double coord_threshold) {
     // Coordinate adjustment heuristics.
@@ -189,9 +174,7 @@ double KukaRsiRosInterface::calculateCoordinateAdjustmentValue(
     }
 }
 
-/*
- * TODO.
- */
+
 KukaPose KukaRsiRosInterface::getAdjustmentPose(KukaPose current_pose,
                                                 KukaPose goal_pose) {
     // Specify how close the actual end coordinate must be to the specified
@@ -318,10 +301,6 @@ KukaPose KukaRsiRosInterface::getAdjustmentPose(KukaPose current_pose,
 }
 
 
-/*
- * TODO.
- * TODO: Handle exceptions.
- */
 bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
     ROS_INFO("Moving to goal position: "
              "X: %2f, Y: %2f, Z: %2f, A: %2f, B: %2f, C: %2f",
@@ -387,11 +366,12 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
 }
 
 
-/*
- * TODO.
- */
-bool KukaRsiRosInterface::communicationStep(TiXmlDocument instruction) {
+bool KukaRsiRosInterface::keepAlive() {
     try {
+        // Use default instruction as specified in the XML template.
+        TiXmlDocument instruction =
+            cloneTiXmlDocument(this->instruction_template);
+
         // Get response data from controller as XML
         TiXmlDocument response = this->rsi_comm->receiveDataFromController();
 
@@ -411,12 +391,13 @@ bool KukaRsiRosInterface::communicationStep(TiXmlDocument instruction) {
 }
 
 
-/*
- * TODO.
- */
 void KukaRsiRosInterface::run() {
     try {
-        this->rsi_comm->initiate(this->instruction_template);
+        // Use default instruction as specified in the XML template.
+        TiXmlDocument instruction =
+            cloneTiXmlDocument(this->instruction_template);
+
+        this->rsi_comm->initiate(instruction);
     } catch (const std::exception &e) {
         ROS_ERROR("Problem initiating communication with robot controller.");
         throw;
@@ -433,10 +414,7 @@ void KukaRsiRosInterface::run() {
         // Continue receiving data from the robot controller and send default
         // response to keep RSI alive.
 
-        TiXmlDocument instruction =
-            cloneTiXmlDocument(this->instruction_template);
-
-        bool is_alive = communicationStep(instruction);
+        bool is_alive = keepAlive();
 
         if (!is_alive) {
             ROS_ERROR("Problem communicating with robot controller.");
