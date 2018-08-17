@@ -67,3 +67,12 @@ double KukaPose::getB() {
 double KukaPose::getC() {
     return this->c;
 }
+
+/*
+ * Returns true if the values of X, Y, Z, A, B, C are all 0, and
+ * false otherwise.
+ */
+bool KukaPose::isZero() {
+    return (this->x == 0 && this->y == 0 && this->z == 0 &&
+            this->a == 0 && this->b == 0 && this->c == 0);
+}

@@ -91,6 +91,12 @@ class KukaPose
          * Returns the C value of the position.
          */
         double getC();
+
+        /*
+         * Returns true if the values of X, Y, Z, A, B, C are all 0, and
+         * false otherwise.
+         */
+        bool isZero();
 };
 
 #endif /* KukaPose */

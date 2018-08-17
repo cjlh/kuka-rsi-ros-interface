@@ -85,16 +85,14 @@ class KukaRsiRosInterface
         /*
          * TODO.
          */
-        bool arePositionValuesWithinThreshold(double threshold,
-                                              KukaPose pose1,
-                                              KukaPose pose2);
+        double calculateCoordinateAdjustmentValue(double current_val,
+                                                  double target_val,
+                                                  double dist_threshold);
 
         /*
          * TODO.
          */
-        double calculateCoordinateAdjustmentValue(double current_val,
-                                                  double target_val,
-                                                  double dist_threshold);
+        KukaPose getAdjustmentPose(KukaPose current_pose, KukaPose goal_pose);
 
         /*
          * TODO.

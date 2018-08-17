@@ -167,21 +167,6 @@ KukaPose KukaRsiRosInterface::getCurrentPosition() {
 /*
  * TODO.
  */
-bool KukaRsiRosInterface::arePositionValuesWithinThreshold(double threshold,
-                                                           KukaPose pose1,
-                                                           KukaPose pose2) {
-    return (fabs(pose1.getX() - pose2.getX()) <= threshold
-            && fabs(pose1.getY() - pose2.getY()) <= threshold
-            && fabs(pose1.getZ() - pose2.getZ()) <= threshold
-            && fabs(pose1.getA() - pose2.getA()) <= threshold
-            && fabs(pose1.getB() - pose2.getB()) <= threshold
-            && fabs(pose1.getC() - pose2.getC()) <= threshold);
-}
-
-
-/*
- * TODO.
- */
 double KukaRsiRosInterface::calculateCoordinateAdjustmentValue(
         double current_val, double goal_val, double coord_threshold) {
     // Coordinate adjustment heuristics.
@@ -204,12 +189,11 @@ double KukaRsiRosInterface::calculateCoordinateAdjustmentValue(
     }
 }
 
-
 /*
  * TODO.
- * TODO: Handle exceptions.
  */
-bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
+KukaPose KukaRsiRosInterface::getAdjustmentPose(KukaPose current_pose,
+                                                KukaPose goal_pose) {
     // Specify how close the actual end coordinate must be to the specified
     // goal coordinate.
     const double coord_threshold = 0.5;
@@ -217,80 +201,85 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
     const double max_angle_adj   = 0.04;
     const double near_angle_dist = 5.0;
 
-    ROS_INFO("Moving to goal position: "
-             "X: %2f, Y: %2f, Z: %2f, A: %2f, B: %2f, C: %2f",
-             goal_pose.getX(), goal_pose.getY(), goal_pose.getZ(),
-             goal_pose.getA(), goal_pose.getB(), goal_pose.getC());
+    // Calculate adjustment for each coordinate value.
+    // If a coordinate is sufficiently close, do not make any adjustment,
+    // otherwise calculate the adjustment to make based on how close it is.
+    
+    double x_adj, y_adj, z_adj;
 
-    bool is_in_position = false;
+    if (fabs(goal_pose.getX() - current_pose.getX()) <= coord_threshold) {
+        x_adj = 0.0;
+    } else {
+        x_adj = calculateCoordinateAdjustmentValue(current_pose.getX(),
+                                                   goal_pose.getX(),
+                                                   coord_threshold);
+    }
+    
+    if (fabs(goal_pose.getY() - current_pose.getY()) <= coord_threshold) {
+        y_adj = 0.0;
+    } else {
+        y_adj = calculateCoordinateAdjustmentValue(current_pose.getY(),
+                                                   goal_pose.getY(),
+                                                   coord_threshold);
+    }
 
-    while (!is_in_position) {
-        // Receive data from controller to get current pose, but do not yet
-        // respond.
-        TiXmlDocument response = this->rsi_comm->receiveDataFromController();
-        KukaPose current_pose = getPositionDataFromResponse(response);
+    if (fabs(goal_pose.getZ() - current_pose.getZ()) <= coord_threshold) {
+        z_adj = 0.0;
+    } else {
+        z_adj = calculateCoordinateAdjustmentValue(current_pose.getZ(),
+                                                   goal_pose.getZ(),
+                                                   coord_threshold);
+    }
 
-        // Calculate adjustment for each coordinate value.
-        // If not within threshold distance of goal pose, make adjustment,
-        // otherwise adjust by 0.
-        
-        double x_adj = calculateCoordinateAdjustmentValue(current_pose.getX(),
-                                                          goal_pose.getX(),
-                                                          coord_threshold);
-        
-        double y_adj = calculateCoordinateAdjustmentValue(current_pose.getY(),
-                                                          goal_pose.getY(),
-                                                          coord_threshold);
-        
-        double z_adj = calculateCoordinateAdjustmentValue(current_pose.getZ(),
-                                                          goal_pose.getZ(),
-                                                          coord_threshold);
+    // Calculate adjustment for each rotation value using quaternions. To do
+    // this convert the goal pose and current pose into quaternion
+    // representations; it is then possible to divide the goal quaternion by the
+    // current quaternion to obtain the transformation required to get from one
+    // position to the other.
+    //
+    // In the resulting quaternion, the axes specify the proportion of the
+    // quaternion's angle that must be rotated by over the X, Y, Z axes in order
+    // to reach the goal position. We can then rotate around each axis using
+    // this proportion as a multiplier of a base velocity. When the resulting
+    // transformation's angle is 0 we know we have reached our goal orientation.
+    //
+    // Note that the (A, B, C) values KUKA uses are YPR and not RPY, so we take
+    // the resulting Z proportion for X and vice versa.
 
-        // Calculate adjustment for each rotation value using quaternions.
-        // To do thise convert the goal pose and current pose into quaternion
-        // representations; it is then possible to divide the goal quaternion
-        // by the current quaternion to obtain the transformation required to
-        // get from one position to the other.
-        //
-        // In the resulting quaternion, the axes specify the proportion of the
-        // quaternion's angle that must be rotated by over the X, Y, Z axes in
-        // order to reach the goal position. We can then rotate around each
-        // axis using this proportion as a multiplier of a base velocity. When
-        // the resulting transformation's angle is 0 we know we have reached our
-        // goal orientation.
-        //
-        // Note that the (A, B, C) values KUKA uses are YPR and not RPY, so we
-        // take the resulting Z proportion for X and vice versa.
+    // Create quaternion from goal position.
+    double y_goal = angles::from_degrees(goal_pose.getA());
+    double p_goal = angles::from_degrees(goal_pose.getB());
+    double r_goal = angles::from_degrees(goal_pose.getC());
+    tf::Quaternion q_goal = tf::createQuaternionFromRPY(r_goal, p_goal, y_goal);
 
-        // Create quaternion from goal position
-        tf::Quaternion q_goal;
-        double y_goal = angles::from_degrees(goal_pose.getA());
-        double p_goal = angles::from_degrees(goal_pose.getB());
-        double r_goal = angles::from_degrees(goal_pose.getC());
-        q_goal = tf::createQuaternionFromRPY(r_goal, p_goal, y_goal);
+    // Create quaternion from current position.
+    double y_curr = angles::from_degrees(current_pose.getA());
+    double p_curr = angles::from_degrees(current_pose.getB());
+    double r_curr = angles::from_degrees(current_pose.getC());
+    tf::Quaternion q_curr = tf::createQuaternionFromRPY(r_curr, p_curr, y_curr);
 
-        // Create quaternion from current position
-        tf::Quaternion q_curr;
-        double y_curr = angles::from_degrees(current_pose.getA());
-        double p_curr = angles::from_degrees(current_pose.getB());
-        double r_curr = angles::from_degrees(current_pose.getC());
-        q_curr = tf::createQuaternionFromRPY(r_curr, p_curr, y_curr);
+    // Create the transformation quaternion by multiplying the goal
+    // quaternion by the inverse of the current quaternion.
+    // This is the same as dividing the goal quaternion by the current
+    // quaternion.
+    tf::Quaternion q_new = q_goal * q_curr.inverse();
 
-        // Create the transformation quaternion by multiplying the goal
-        // quaternion by the inverse of the current quaternion.
-        // This is the same as dividing the goal quaternion by the current
-        // quaternion.
-        tf::Quaternion q_new;
-        q_new = q_goal * q_curr.inverse();
+    // Convert the resulting angle to degrees.
+    double angle = angles::to_degrees(q_new.getAngle());
 
-        // Convert the resulting angle to degrees.
-        double angle = angles::to_degrees(q_new.getAngle());
+    // Calculate the adjustment for (A, B, C) based on the resulting
+    // proportions.
 
-        // Calculate the adjustment for (A, B, C) based on the resulting
-        // proportions.
+    double a_adj, b_adj, c_adj;
 
-        double a_adj, b_adj, c_adj;
-
+    if (angle < angle_threshold || angle > (360 - angle_threshold)) {
+        // If the required rotation angle is sufficiently small, consider the
+        // current position "close enough".
+        a_adj = 0.0;
+        b_adj = 0.0;
+        c_adj = 0.0;
+    } else {
+        // Otherwise calculate the rotation for each axis based on this angle.
         if (angle < near_angle_dist) {
             // Slow down max adjustments when rotation angle is small.
             a_adj = q_new.getAxis().z()
@@ -322,6 +311,34 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
             b_adj *= -1;
             c_adj *= -1;
         }
+    }
+
+    // Return the result as a KukaPose object.
+    return KukaPose(x_adj, y_adj, z_adj, a_adj, b_adj, c_adj);
+}
+
+
+/*
+ * TODO.
+ * TODO: Handle exceptions.
+ */
+bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
+    ROS_INFO("Moving to goal position: "
+             "X: %2f, Y: %2f, Z: %2f, A: %2f, B: %2f, C: %2f",
+             goal_pose.getX(), goal_pose.getY(), goal_pose.getZ(),
+             goal_pose.getA(), goal_pose.getB(), goal_pose.getC());
+
+    bool is_in_position = false;
+
+    while (!is_in_position) {
+        // Receive data from controller to get current pose, but do not yet
+        // respond.
+        TiXmlDocument response = this->rsi_comm->receiveDataFromController();
+        KukaPose current_pose = getPositionDataFromResponse(response);
+
+        // Calculate adjustment values from current pose to move towards the
+        // goal pose.
+        KukaPose adjustment_pose = getAdjustmentPose(current_pose, goal_pose);
 
         // Create movement instruction by modifying XML of instruction template.
         TiXmlDocument instruction =
@@ -343,13 +360,13 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
             throw std::exception();
         }
 
-        // Set a.
-        rkorr_elem->SetDoubleAttribute("X", x_adj);
-        rkorr_elem->SetDoubleAttribute("Y", y_adj);
-        rkorr_elem->SetDoubleAttribute("Z", z_adj);
-        rkorr_elem->SetDoubleAttribute("A", a_adj);
-        rkorr_elem->SetDoubleAttribute("B", b_adj);
-        rkorr_elem->SetDoubleAttribute("C", c_adj);
+        // Set adjustment values in XML response.
+        rkorr_elem->SetDoubleAttribute("X", adjustment_pose.getX());
+        rkorr_elem->SetDoubleAttribute("Y", adjustment_pose.getY());
+        rkorr_elem->SetDoubleAttribute("Z", adjustment_pose.getZ());
+        rkorr_elem->SetDoubleAttribute("A", adjustment_pose.getA());
+        rkorr_elem->SetDoubleAttribute("B", adjustment_pose.getB());
+        rkorr_elem->SetDoubleAttribute("C", adjustment_pose.getC());
 
         // Send instruction to controller and re-loop
         bool success = this->rsi_comm->sendInstructionToController(instruction);
@@ -359,12 +376,8 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
             return false;
         }
 
-        // Check if current position is within threshold of goal position;
-
-        if (fabs(goal_pose.getX() - current_pose.getX()) <= coord_threshold &&
-            fabs(goal_pose.getY() - current_pose.getY()) <= coord_threshold &&
-            fabs(goal_pose.getZ() - current_pose.getZ()) <= coord_threshold &&
-            angle < angle_threshold) {
+        // If no more adjustments are required, end the loop.
+        if (adjustment_pose.isZero()) {
             is_in_position = true;
         }
     }
