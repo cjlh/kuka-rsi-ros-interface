@@ -30,22 +30,31 @@ Status: In development**
 - The host PC running this software must be connected directly to the robot controller via Ethernet.
   - For the KR C4 Compact controller the Ethernet cable should be connected to the X66 port.
 - The robot controller should be running KUKA System Software 8.3 with KUKA.RobotSensorInterface 3.3; different versions may be compatible but have not been tested.
-- ROS Kinetic must be installed on the host PC, along with the packages listed in the 'ROS dependencies' section below.
+- ROS Kinetic must be installed on the host PC, along with any other dependencies listed in the section below.
 
 
 ## Installation
 
-### ROS dependencies
-[to do]
+The following instructions assume you have already downloaded/cloned this repository onto your host PC. This can be done from the terminal using `git clone https://github.com/cjlh/kuka-rsi-ros-interface.git`.
 
 ### Installation on robot controller
+
 1.  Change user group to *Expert* on robot controller/KUKA smartPAD
     - `Main menu` -> `User group` -> `Expert`
 2.  From the `krc_files` directory, copy the file `RSI_Ethernet.src` to the directory `KRC:\R1\Program` on the robot controller
     - E.g. using a USB stick
 3.  Copy the remaining files from the `krc_files` directory to the directory `C:\KRC\ROBOTER\Config\User\Common\SensorInterface` on the robot controller
 
-### Building the `kuka_rsi_ros_interface` packages
+### Building from source
+
+#### Dependencies
+
+- [Robot Operating System (ROS) Kinetic](http://www.ros.org/),
+- [TinyXML](http://www.grinninglizard.com/tinyxml/) (included with ROS),
+- [yaml-cpp](https://github.com/jbeder/yaml-cpp) (included with ROS).
+
+#### Building
+
 1.  Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
 2.  Build the packages using catkin (Note: tested with catkin_tools only)
     - E.g.:
