@@ -49,6 +49,7 @@ Status: In development**
 1.  Copy the directory `kuka_rsi_ros_interface` from `catkin_ws/src` to your catkin workspace source directory (e.g. `~/catkin_ws/src`)
 2.  Build the packages using catkin (Note: tested with catkin_tools only)
     - E.g. `$ catkin build`
+    - Note that the `kuka_rsi_ros_interface` directory contains two packages: `kuka_rsi_ros_interface_core` and `kuka_rsi_ros_interface_msgs`; the `kuka_rsi_ros_interface_core` package is dependent upon the message and service types defined in `kuka_rsi_ros_interface_msgs`, and so they both must be built.
 
 
 ## Usage and getting started
