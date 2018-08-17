@@ -35,7 +35,7 @@ Status: In development**
 
 ## Installation
 
-The following instructions assume you have already downloaded/cloned this repository onto your host PC. This can be done from the terminal using `git clone https://github.com/cjlh/kuka-rsi-ros-interface.git`.
+The following instructions assume you have already downloaded/cloned this repository onto your host PC. This can be done from the terminal using `$ git clone https://github.com/cjlh/kuka-rsi-ros-interface.git`.
 
 ### Installation on robot controller
 
@@ -49,7 +49,7 @@ The following instructions assume you have already downloaded/cloned this reposi
 
 #### Dependencies
 
-- [Robot Operating System (ROS) Kinetic](http://www.ros.org/),
+- [Robot Operating System (ROS)](http://www.ros.org/) Kinetic,
 - [TinyXML](http://www.grinninglizard.com/tinyxml/) (included with ROS),
 - [yaml-cpp](https://github.com/jbeder/yaml-cpp) (included with ROS).
 
