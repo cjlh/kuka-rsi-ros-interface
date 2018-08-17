@@ -16,6 +16,7 @@
 // Package classes
 #include "KukaRsiRosInterface.h"
 
+
 // Settings
 // TODO: Move into yaml file
 namespace settings
@@ -29,8 +30,16 @@ namespace settings
 }
 
 
-/*
- * TODO.
+/**
+ * Main program function.
+ *
+ * Loads program configuration files, initialises node and begins program
+ * execution.
+ *
+ * @param argc Number of strings pointed to by `argv`.
+ * @param argv Argument vector containing command line arguments passed to the
+ *             program.
+ * @return Program execution success value.
  */
 int main(int argc, char **argv) {
     // Initialise ROS node.
