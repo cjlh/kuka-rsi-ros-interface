@@ -66,9 +66,16 @@ The following instructions assume you have already downloaded/cloned this reposi
 ## Usage and getting started
 
 ### Configuration
+
 The `kuka_rsi_ros_interface` node loads the configuration for various settings and parameters from the ROS Parameter Server. When using the included launch file, as detailed in the 'Launching' section below, these configuration settings are loaded onto the ROS parameter server from the `config.yaml` YAML file in the `kuka_rsi_ros_interface_core` package. This file can be found in the package's `config` directory.
 
 To change the node configuration, you may modify the `config.yaml` file directly. This should be fairly intuitive, but if you have not used YAML before the [Complete Idiot's Introduction to YAML](https://github.com/Animosity/CraftIRC/wiki/Complete-idiot%27s-introduction-to-yaml) may be a good resource.
+
+#### Changing IP address/port settings
+
+If you wish to change the IP address and/or port settings in `config.yaml`, you must also change the same values in the `RSI_EthernetConfig.xml` file that is uploaded to the robot controller. For instructions on how to upload this file, see the 'Installation on robot controller' section above.
+
+#### Default configuration
 
 The default configuration file with included annotations is as follows:
 
