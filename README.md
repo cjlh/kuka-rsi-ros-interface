@@ -50,8 +50,7 @@ The following instructions assume you have already downloaded/cloned this reposi
 #### Dependencies
 
 - [Robot Operating System (ROS)](http://www.ros.org/) Kinetic,
-- [TinyXML](http://www.grinninglizard.com/tinyxml/) (included with ROS),
-- [yaml-cpp](https://github.com/jbeder/yaml-cpp) (included with ROS).
+- [TinyXML](http://www.grinninglizard.com/tinyxml/) (included with ROS).
 
 #### Building
 
@@ -67,10 +66,45 @@ The following instructions assume you have already downloaded/cloned this reposi
 ## Usage and getting started
 
 ### Configuration
-[to do - detail default IP/port settings and how to change]
+The `kuka_rsi_ros_interface` node loads the configuration for various settings and parameters from the ROS Parameter Server. When using the included launch file, as detailed in the 'Launching' section below, these configuration settings are loaded onto the ROS parameter server from the `config.yaml` YAML file in the `kuka_rsi_ros_interface_core` package. This file can be found in the package's `config` directory.
+
+To change the node configuration, you may modify the `config.yaml` file directly. This should be fairly intuitive, but if you have not used YAML before the [Complete Idiot's Introduction to YAML](https://github.com/Animosity/CraftIRC/wiki/Complete-idiot%27s-introduction-to-yaml) may be a good resource.
+
+The default configuration file is as follows:
+
+```yaml
+---
+# Server settings.
+server:
+  ip_address: "172.31.1.146"
+  port: 49152
+  # Buffer size used for receiving data from the robot controller.
+  buffer_size: 1024
+
+# Settings for movement adjustment heuristics.
+adjustment_heuristics:
+  # Heuristics for adjusting the X, Y, Z coordinates of the robot.
+  coordinates:
+    base_adj: 0.02
+    max_adj: 0.1
+    diff_divisor: 850.0
+    threshold: 0.5
+  # Heuristics for adjusting the A (yaw), B (pitch), C (roll) rotation values
+  # of the robot.
+  angles:
+    max_adj: 0.04
+    near_distance: 5.0
+    threshold: 0.1
+```
 
 ### Launching
-[to do]
+To launch the `kuka_rsi_ros_interface` node with the configuration file as above, simply run the following command:
+
+```
+roslaunch kuka_rsi_ros_interface_core start.launch
+```
+
+This will load the contents of `config.yaml` to the ROS Parameter Server and launch the node (it will also launch the ROS Master if it is not already running).
 
 
 ## Nodes

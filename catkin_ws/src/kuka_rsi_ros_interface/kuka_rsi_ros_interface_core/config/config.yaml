@@ -1,0 +1,22 @@
+---
+# Server settings.
+server:
+  ip_address: "172.31.1.146"
+  port: 49152
+  # Buffer size used for receiving data from the robot controller.
+  buffer_size: 1024
+
+# Settings for movement adjustment heuristics.
+adjustment_heuristics:
+  # Heuristics for adjusting the X, Y, Z coordinates of the robot.
+  coordinates:
+    base_adj: 0.02
+    max_adj: 0.1
+    diff_divisor: 850.0
+    threshold: 0.5
+  # Heuristics for adjusting the A (yaw), B (pitch), C (roll) rotation values
+  # of the robot.
+  angles:
+    max_adj: 0.04
+    near_distance: 5.0
+    threshold: 0.1
