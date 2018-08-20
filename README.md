@@ -70,30 +70,46 @@ The `kuka_rsi_ros_interface` node loads the configuration for various settings a
 
 To change the node configuration, you may modify the `config.yaml` file directly. This should be fairly intuitive, but if you have not used YAML before the [Complete Idiot's Introduction to YAML](https://github.com/Animosity/CraftIRC/wiki/Complete-idiot%27s-introduction-to-yaml) may be a good resource.
 
-The default configuration file is as follows:
+The default configuration file with included annotations is as follows:
 
 ```yaml
 ---
 # Server settings.
 server:
+  # IP address to bind to on the host PC.
   ip_address: "172.31.1.146"
+  # Port to bind to on the host PC.
   port: 49152
   # Buffer size used for receiving data from the robot controller.
   buffer_size: 1024
 
-# Settings for movement adjustment heuristics.
+# Settings for adjusting the robot position.
 adjustment_heuristics:
   # Heuristics for adjusting the X, Y, Z coordinates of the robot.
   coordinates:
+    # Minimum coordinate adjustment per RSI instruction when moving into a given
+    # position.
     base_adj: 0.02
+    # Maximum coordinate adjustment per RSI instruction when moving into a given
+    # position.
     max_adj: 0.1
     diff_divisor: 850.0
+    # Maximum distance of each of the robot's actual position coordinates from
+    # a given target position's coordinates for the robot to be considered
+    # in-position.
     threshold: 0.5
   # Heuristics for adjusting the A (yaw), B (pitch), C (roll) rotation values
   # of the robot.
   angles:
+    # Maximum rotation value adjustment per RSI instruction when moving into a
+    # given position.
     max_adj: 0.04
+    # Angle between the robot's current position axes and the target position
+    # axes below which the robot's movement slows down to allow for greater
+    # movement accuracy as it approaches the target position.
     near_distance: 5.0
+    # Maximum angle between the robot's current position axes and the target
+    # position axes for the robot to be considered in-position.
     threshold: 0.1
 ```
 
