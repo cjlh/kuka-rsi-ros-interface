@@ -18,6 +18,10 @@ adjustment_heuristics:
     # Maximum coordinate adjustment per RSI instruction when moving into a given
     # position.
     max_adj: 0.1
+    # Amount to divide the difference between a current coordinate value and
+    # a target coordinate value by to add onto the `base_adj` value to obtain
+    # the adjustment to send in a given RSI instruction for that coordinate
+    # value (if not exceeding `max_adj`).
     diff_divisor: 850.0
     # Maximum distance of each of the robot's actual position coordinates from
     # a given target position's coordinates for the robot to be considered
