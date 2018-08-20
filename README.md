@@ -118,10 +118,10 @@ adjustment_heuristics:
 ```
 
 ### Launching
-To launch the `kuka_rsi_ros_interface` node with the configuration file as above, simply run the following command:
+To launch the `kuka_rsi_ros_interface` node with the configuration file as above, simply run the following command in the terminal:
 
 ```
-roslaunch kuka_rsi_ros_interface_core start.launch
+$ roslaunch kuka_rsi_ros_interface_core start.launch
 ```
 
 This will load the contents of `config.yaml` to the ROS Parameter Server and launch the node (it will also launch the ROS Master if it is not already running).
