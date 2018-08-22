@@ -5,7 +5,7 @@
 
 A ROS node for the manipulation of a KUKA robot arm via RSI 3.
 
-This node advertises services for moving a KUKA robot arm into a desired position—specifying the X, Y, Z, A, B, C values for the robot's end effector—and for obtaining the current position of the robot arm's end effector.
+This node advertises services for moving a KUKA robot arm into a desired position—specifying the X, Y, Z, A, B, C values for the robot's end effector—and for obtaining its current position.
 
 This node for ROS Kinetic and tested on Ubuntu 16.04. Tested using a KR C4 Compact controller running KUKA System Software 8.3 with KUKA.RobotSensorInterface 3.3 and a KR 3 R540 robot arm.
 
