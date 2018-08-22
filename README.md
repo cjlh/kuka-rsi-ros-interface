@@ -179,7 +179,8 @@ The returned `KukaPose` message contains each of the X, Y, Z, A, B, C values of 
 
 ## To-do
 
-- [ ] Finish code documentation
+- [ ] Finish code documentation and include license details
 - [ ] Implement config file loading (config does not currently have any effect)
 - [ ] Rename services to include namespace
 - [ ] Implement A6 rotation with additional service
+- [ ] Ensure correctness of `package.xml`
