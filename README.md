@@ -179,5 +179,7 @@ The returned `KukaPose` message contains each of the X, Y, Z, A, B, C values of 
 
 ## To-do
 
-- [ ] Add yaml config files for IP, port, etc.
+- [ ] Finish code documentation
+- [ ] Implement config file loading (config does not currently have any effect)
 - [ ] Rename services to include namespace
+- [ ] Implement A6 rotation with additional service
