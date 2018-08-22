@@ -125,6 +125,7 @@ adjustment_heuristics:
 ```
 
 ### Launching
+
 To launch the `kuka_rsi_ros_interface` node with the configuration file as above, simply run the following command in the terminal:
 
 ```
@@ -134,10 +135,47 @@ $ roslaunch kuka_rsi_ros_interface_core start.launch
 This will load the contents of `config.yaml` to the ROS Parameter Server and launch the node (it will also launch the ROS Master if it is not already running).
 
 
-## Nodes
-[to do]
+### Usage
+
+The `kuka_rsi_ros_interface` node advertises two services: `/move_to_position` and `/get_position_values`. The custom message type and service types for both of thse services are defined in the `kuka_rsi_ros_interface_msgs` package.
+
+Both services utilise the `KukaPose` ROS message type, which is defined as follows:
+
+```
+float64 x
+float64 y
+float64 z
+float64 a
+float64 b
+float64 c
+```
+
+#### `/move_to_position`
+
+The `/move_to_position` service uses the `MoveToPose` service type, which accepts a message of type `KukaPose`, containing each of the X, Y, Z, A, B, C values of the desired end effector position, and returns a boolean and a string. The service is defined as follows:
+
+```
+KukaPose pose
+---
+bool success
+string message
+```
+
+The `success` boolean is returned as `true` if the robot is moved successfully, and `false` otherwise. If an error is encountered in moving the robot, the `message` string will contain a relevant error message, otherwise it will contain the message `"Successfully moved robot to specified position"`.
+
+#### `/get_position_values`
+
+The `/get_position_values` service uses the `GetPose` service type, which accepts an empty message (of ROS standard type `std_msgs/Empty`) which is defined as follows:
+
+```
+---
+KukaPose pose
+```
+
+The returned `KukaPose` message contains each of the X, Y, Z, A, B, C values of the robot's current end effector position.
 
 
 ## To-do
 
 - [ ] Add yaml config files for IP, port, etc.
+- [ ] Rename services to include namespace
