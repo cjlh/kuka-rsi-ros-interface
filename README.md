@@ -150,7 +150,7 @@ float64 b
 float64 c
 ```
 
-#### `/move_to_position`
+#### Service 1: `/move_to_position`
 
 The `/move_to_position` service uses the `MoveToPose` service type, which accepts a message of type `KukaPose`, containing each of the X, Y, Z, A, B, C values of the desired end effector position, and returns a boolean and a string. The service is defined as follows:
 
@@ -163,7 +163,7 @@ string message
 
 The `success` boolean is returned as `true` if the robot is moved successfully, and `false` otherwise. If an error is encountered in moving the robot, the `message` string will contain a relevant error message, otherwise it will contain the message `"Successfully moved robot to specified position"`.
 
-#### `/get_position_values`
+#### Service 2: `/get_position_values`
 
 The `/get_position_values` service uses the `GetPose` service type, which accepts an empty message (of ROS standard type `std_msgs/Empty`) which is defined as follows:
 
