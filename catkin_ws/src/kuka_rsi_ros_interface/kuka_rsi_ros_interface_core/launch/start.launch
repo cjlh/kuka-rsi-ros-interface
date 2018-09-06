@@ -1,5 +1,5 @@
 <launch>
-	<node pkg="kuka_rsi_ros_interface_core" name="kuka_rsi_ros_interface" type="kuka_rsi_ros_interface">
+	<node pkg="kuka_rsi_ros_interface_core" name="kuka_rsi_ros_interface" type="kuka_rsi_ros_interface" output="screen">
 		<rosparam command="load" file="$(find kuka_rsi_ros_interface_core)/config/config.yaml"/>
 	</node>
 </launch>
