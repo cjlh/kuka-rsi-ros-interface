@@ -19,12 +19,10 @@
 #include "KukaPose.h"
 
 
-/*
- * TODO.
- */
 RsiCommunicator::RsiCommunicator(const char* ip_address,
                                  uint16_t port,
                                  int buffer_size) {
+    // Set object data members.
     this->port = port;
     this->ip_address = ip_address;
     this->buffer_size = buffer_size;
@@ -66,9 +64,6 @@ RsiCommunicator::~RsiCommunicator() {
 }
 
 
-/*
- *
- */
 bool RsiCommunicator::setSocketTimeout(long sec, long usec) {
     struct timeval timeout;
     timeout.tv_sec = sec;
@@ -81,9 +76,6 @@ bool RsiCommunicator::setSocketTimeout(long sec, long usec) {
 }
 
 
-/*
- * TODO.
- */
 void RsiCommunicator::closeSocket() {
     ROS_WARN("Closing socket.");
     close(this->server_fd);
@@ -132,9 +124,6 @@ TiXmlDocument RsiCommunicator::updateMessageTimestamp(
 }
 
 
-/*
- * TODO.
- */
 void RsiCommunicator::initiate(TiXmlDocument initial_instruction) {
     // TODO: implement ctrl+c interrupt
     ROS_INFO("Waiting to receive data from RSI on %s:%u...",
@@ -194,7 +183,6 @@ TiXmlDocument RsiCommunicator::receiveDataFromController() {
 
 
 /*
- * TODO.
  * TODO: Decide if function should accept a string instead of TiXmlDocument.
  */
 bool RsiCommunicator::sendInstructionToController(TiXmlDocument instruction) {

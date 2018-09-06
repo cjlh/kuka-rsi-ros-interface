@@ -7,9 +7,6 @@
 #include <ros/ros.h>
 #include <ros/package.h>
 
-// YAML parsing
-// #include "yaml-cpp/yaml.h"
-
 // XML parsing
 #include <tinyxml.h>
 
@@ -17,16 +14,24 @@
 #include "KukaRsiRosInterface.h"
 
 
-// Settings
-// TODO: Move into yaml file
-namespace settings
-{
-    const std::string node_name = "kuka_rsi_ros_interface";
-    const std::string package_path =
-        ros::package::getPath("kuka_rsi_ros_interface_core");
-    const char* server_address = "172.31.1.146";
-    const uint16_t server_port = 49152;
-    const int buffer_size = 1024;
+/**
+ * Convert a C string to uint16_t.
+ *
+ * Used for reading the server port setting from the ROS parameter server.
+ *
+ * @param str C string containing the uint16_t value.
+ * @return A uint16_t object parsed from the C string. 
+ */
+uint16_t str_to_uint16(const char *str) {
+    uint16_t result;
+    char *end;
+    errno = 0;
+    long tmp = strtol(str, &end, 10);
+    if (errno || end == str || *end != '\0' || tmp < 0 || tmp > UINT16_MAX) {
+        throw std::exception();
+    }
+    result = (uint16_t) tmp;
+    return result;
 }
 
 
@@ -42,13 +47,41 @@ namespace settings
  * @return Program execution success value.
  */
 int main(int argc, char **argv) {
-    // Initialise ROS node.
-    ros::init(argc, argv, settings::node_name);
+    // Initialise ROS node, including default node name.
+    ros::init(argc, argv, "kuka_rsi_ros_interface");
     ros::NodeHandle nh;
 
+    // Load configuration from parameter server - default values provided.
+
+    // Load server address setting.
+    std::string server_address;
+    nh.param<std::string>("server/ip_address",
+                          server_address,
+                          "172.31.1.146");
+
+    // Load buffer size setting.
+    int buffer_size;
+    nh.param<int>("server/buffer_size",
+                  buffer_size,
+                  1024);
+
+    // Load server port setting.
+    std::string server_port_str;
+    nh.param<std::string>("server/port",
+                          server_port_str,
+                          "49152");
+    uint16_t server_port;
+    try {
+        server_port = str_to_uint16(server_port_str.c_str());
+    } catch (std::exception &e) {
+        ROS_ERROR("Port setting could not be parsed from config file.");
+        exit(EXIT_FAILURE);
+    }
+
     // Load RSI XML template file using TinyXML.
-    std::string xml_file_path = settings::package_path +
-                                "/xml/DataTemplate.xml";
+    std::string package_path =
+        ros::package::getPath("kuka_rsi_ros_interface_core");
+    std::string xml_file_path = package_path + "/xml/DataTemplate.xml";
     TiXmlDocument rsiXmlTemplate(xml_file_path.c_str());
     bool is_xml_loaded = rsiXmlTemplate.LoadFile();
 
@@ -64,10 +97,9 @@ int main(int argc, char **argv) {
     try {
         // Create KukaRisRosInterface object, this will be responsible for
         // the core node logic.
-        KukaRsiRosInterface interface(settings::node_name,
-                                      settings::server_address,
-                                      settings::server_port,
-                                      settings::buffer_size,
+        KukaRsiRosInterface interface(server_address.c_str(),
+                                      server_port,
+                                      buffer_size,
                                       rsiXmlTemplate);
 
         // Create service for requesting current position. The service accepts

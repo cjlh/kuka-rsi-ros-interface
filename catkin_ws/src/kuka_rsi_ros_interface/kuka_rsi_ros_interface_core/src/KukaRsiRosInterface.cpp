@@ -365,6 +365,70 @@ bool KukaRsiRosInterface::moveToPosition(KukaPose goal_pose) {
     return true;
 }
 
+/*
+ * The following function is untested. I was in the middle of working on it when
+ * my placement at Manchester University ended so it is currently unused, but I
+ * have left it here in case someone wants to use it as a base for implementing
+ * its intended functionality.
+ * - Caleb
+ */
+bool KukaRsiRosInterface::rotateEndEffector(double rotation_degrees) {
+
+    if (rotation_degrees > 359) {
+        ROS_ERROR("Invalid end effector rotation request received "
+                  "(rotation must be in range [MINIMUM, MAXIMUM]).");
+        return false;
+    } else if (rotation_degrees < -359) {
+        ROS_ERROR("Invalid end effector rotation request received "
+                  "(rotation must be in range [MINIMUM, MAXIMUM]).");
+        return false;
+    }
+
+    ROS_INFO("Calculating goal pose for end effector rotation %2f degrees.",
+             rotation_degrees);
+
+    // Receive data from controller to get current pose, but do not yet respond.
+    TiXmlDocument response = this->rsi_comm->receiveDataFromController();
+
+    // Clone default instruction as reply such that communication is kept alive.
+    TiXmlDocument instruction =
+        cloneTiXmlDocument(this->instruction_template);
+
+    // Update timestamp of instruction to the timestamp received from
+    // the controller.
+    instruction =
+        this->rsi_comm->updateMessageTimestamp(response, instruction);
+
+    // Send instruction to robot controller.
+    bool send_data =
+        this->rsi_comm->sendInstructionToController(instruction);
+
+    // Get current pose from controller.
+    KukaPose current_pose = getPositionDataFromResponse(response);
+
+    // Get current values in radians
+    double a_rad = angles::from_degrees(current_pose.getA());
+    double b_rad = angles::from_degrees(current_pose.getB());
+    double c_rad = angles::from_degrees(current_pose.getC());
+
+    // The adjustment values below come from taking the last column of the
+    // matrix resulting from the multiplication of the yaw rotation matrix
+    // (A value), pitch rotation matrix (B value) and the roll rotation
+    // matrix (C value). This gives the axis values to rotate around in
+    // order to only rotate the end effector.
+
+    double a_adj = (sin(a_rad) * sin(c_rad)) +
+                   (cos(a_rad) * sin(b_rad) * cos(c_rad));
+    double b_adj = (cos(a_rad) * sin(c_rad)) +
+                   (sin(a_rad) * sin(b_rad) * cos(c_rad));
+    double c_adj = cos(b_rad) * cos(c_rad);
+
+    // moveToPosition
+
+    ROS_INFO("Successfully rotated end effector.");
+    return true;
+}
+
 
 bool KukaRsiRosInterface::keepAlive() {
     try {

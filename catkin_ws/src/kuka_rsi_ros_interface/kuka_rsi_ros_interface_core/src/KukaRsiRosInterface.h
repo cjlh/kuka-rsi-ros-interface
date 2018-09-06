@@ -166,6 +166,17 @@ class KukaRsiRosInterface
         bool moveToPosition(KukaPose goal_pose);
 
         /**
+         * Rotates the end effector (axis 6) of the robot a specified number of
+         * degrees.
+         *
+         * @param rotation_degrees A number of degrees through which to rotate
+         *     the robot's end effector ([SPECIFY LIMITS HERE]).
+         * @return True if the end effector is successfully rotated, false
+         *     otherwise.
+         */
+        bool rotateEndEffector(double rotation_degrees);
+
+        /**
          * Keeps RSI communication alive by receiving the current data from the
          * robot and responding with the stored default XML template.
          *
