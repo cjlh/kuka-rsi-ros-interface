@@ -78,6 +78,8 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
+    ROS_INFO("Loaded server settings from parameter server");
+
     // Load RSI XML template file using TinyXML.
     std::string package_path =
         ros::package::getPath("kuka_rsi_ros_interface_core");
